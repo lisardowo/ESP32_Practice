@@ -123,7 +123,7 @@ int sendMessage(int receiverID, int emmisorID,char *message,struct device *debug
         return 0;
     }
     else{
-        return 200;
+        return validateConnection(receiverID, emmisorID, message, debugSender, debugReceiver) ;// Will return the respective error code BUT also will duplicate Sender/receiver info #TODO check to changethat
     }
 
  
