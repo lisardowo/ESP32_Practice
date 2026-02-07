@@ -29,6 +29,7 @@ int sendMessage(int receiverID, int emmisorID,char *message,struct device *debug
 int getreceiver();
 int validateConnection(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver);
 int setMessage(char *message,struct device *debugReceiver );
+char* getMessage();
 
 enum metadata{
     
@@ -51,12 +52,9 @@ int main(){
     receiverID = getreceiver(); 
     printf("Provided ID is : %d \n", receiverID);
 
-    //message
-    printf("provide the message : \n");
-    scanf("%*c");
-    fgets(message, MESSAGE_SIZE, stdin);
-    printf("message is : %s\n", message);//TODO set buffer size to prevent bufffer overflows ==> Raise Error for long messages
-
+    char* message = getMessage();
+    printf("message is : %s\n", message);
+  
     // initialization of transmitter
     
     debugSender.emissorID = transmitterID;
@@ -78,6 +76,7 @@ int main(){
         printf("%d\n", succes);
     }
 
+    return 0;
 }
 
 int getreceiver(){
@@ -94,10 +93,19 @@ int getreceiver(){
 
 }
 
-//char getMessage(){} //TODO get message via function
+char* getMessage(){
+    
+    printf("provide the message : \n");
+    scanf("%*c");
+    fgets(message, MESSAGE_SIZE, stdin);
+    //TODO set buffer size to prevent bufffer overflows ==> Raise Error for long messages
+
+    return message;
+} //TODO get message via function
 
 //errors 200 -> NOT possible Communications (user associated)
 //errors 300 -> Message Couldnt be send
+
 int sendMessage(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver){
 
     printf("sendingMessage\n");
