@@ -27,7 +27,7 @@ struct device debugSender;
 
 int sendMessage(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver);
 int getreceiver();
-int validateConnection();
+int validateConnection(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver);
 int setMessage(char *message,struct device *debugReceiver );
 
 enum metadata{
@@ -101,25 +101,10 @@ int getreceiver(){
 int sendMessage(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver){
 
     printf("sendingMessage\n");
-    if (debugSender->emissorID != emmisorID || debugReceiver->emissorID != emmisorID){
 
-        printf("Emisor = %d", emmisorID);
-        printf("Sender = %d  ", debugSender->emissorID);
-        printf("Receiver = %d  \n", debugReceiver->emissorID);
 
-        return 201; // Error 201 -> Not a valid emmisor ID
-
-    }
-    if(debugSender->receiverID != receiverID || debugReceiver->receiverID != receiverID){
-        
-        printf("receiver = %d ", receiverID);
-        printf("Sender = %d  ", debugSender->receiverID);
-        printf("Receiver = %d  \n", debugReceiver->receiverID);
-
-        return 202;// Error 202 -> Not a valid receiver ID
-    }
-    else{
-        printf("Sender Message = %s ", debugSender->message);
+    if(validateConnection(receiverID, emmisorID, message, debugSender, debugReceiver) == 0){
+        printf("Sender Message = %s \n", debugSender->message);
         printf("Receiver Message = %s \n", debugReceiver->message);
         
         if(setMessage(message, debugReceiver) != 0){
@@ -128,7 +113,13 @@ int sendMessage(int receiverID, int emmisorID,char *message,struct device *debug
         }
         printf("Received Message = %s \n", debugReceiver->message);
         return 0;
-    }    
+    }
+    else{
+        return 200;
+    }
+
+ 
+ 
 
 
 }
@@ -139,7 +130,27 @@ int setMessage(char *message,struct device *debugReceiver ){
     return 0;
 }
 
-int ValidateConnection(){
+int validateConnection(int receiverID, int emmisorID,char *message,struct device *debugSender,struct device *debugReceiver){
 
+    if (debugSender->emissorID != emmisorID || debugReceiver->emissorID != emmisorID)
+    {
+
+        printf("Emisor = %d \n", emmisorID);
+        printf("Sender = %d  \n", debugSender->emissorID);
+        printf("Receiver = %d  \n", debugReceiver->emissorID);
+
+        return 201; // Error 201 -> Not a valid emmisor ID
+
+    }
+    if(debugSender->receiverID != receiverID || debugReceiver->receiverID != receiverID)
+    {
+        
+        printf("receiver = %d \n", receiverID);
+        printf("Sender = %d  \n", debugSender->receiverID);
+        printf("Receiver = %d  \n", debugReceiver->receiverID);
+
+        return 202;// Error 202 -> Not a valid receiver ID
+    }
+    
     return 0;
 } //TODO refactorize the validation logic in send To validate comms to keep a cleaner code
