@@ -25,6 +25,10 @@ Before writing code and creating PR make sure that it aligns with our mission an
 
 Feel free to ask questions in issues if you're not sure.
 
+## AI usage
+
+- Usage of any LLM is allowed as a roadmap, for explanation or as code reviewer BUT NO AI GENERATED CODE WILL BE ACCEPTED 
+
 ### Issues
 
 #### Create a new issue
