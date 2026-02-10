@@ -19,20 +19,39 @@ Hermes is designed as the first part in a several "doomsday - devices" project, 
 
 ## Features
 
-- **DRL-Based Routing**: Advanced Deep Reinforcement Learning model for intelligent satellite routing
-- **Satellite Simulation**: Accurate simulation of satellite positions and orbital mechanics
-- **Data Optimization**: 
-  - LZ4 compression for efficient data transfer
-  - XOR-based fragmentation and error correction
-  - Checksum validation for data integrity
-- **Real-Time Monitoring**: Live telemetry tracking and performance metrics
-- **Interactive 3D Visualization**: React-based visualization of satellite networks and Earth
-- **Flexible Configuration**: Configurable satellite parameters and routing policies
-- **Multi-Format Support**: CSV telemetry input with reconstructed output
+- **Messaging off the grid**
+- **Encrypted Communications**
+- **Modular Design**
+
 
 ## Project Structure
 
-### work in progress
+```
+Hermes
+├─ CMakeLists.txt
+├─ LICENSE
+├─ README.md
+├─ esp32.code-workspace
+├─ iliespWiring.png
+├─ include
+│  ├─ README
+│  └─ ili9341.h
+├─ lib
+│  └─ README
+├─ platformio.ini
+├─ sdkconfig.esp32doit-devkit-v1
+├─ src
+│  ├─ CMakeLists.txt
+│  ├─ ili9341.c
+│  ├─ main.c
+│  ├─ setup
+│  └─ transmiter.c
+├─ test
+│  └─ README
+└─ testplayground
+   └─ transmiter
+
+```
 
 ## Prerequisites
 
@@ -49,22 +68,27 @@ Hermes is designed as the first part in a several "doomsday - devices" project, 
 ## Technologies Used
 
 ### Software
-- **c** 
-- **work in progress**
+
+- **C as primary languague** 
+- **Platform.io**
 
 ### Hardware
-- **esp32**
+
+- **Esp32 microcontroller**
 - **LoRa SX1278 module**
-- **ili9341**
+- **Display ili9341**
 
 ## Development
 
 The project uses:
-- **work in progress**
+
+- C as the main language
+- HandMade libraries for all modules (no external libraries)
+
 
 ## Contributing
 
-This project was built by the yakucode team for the people. Contributions are welcome! Feel free to:
+This project was built by the yakucode team, for the people. Contributions are welcome! Feel free to:
 
 - Report bugs
 - Suggest new features
@@ -72,10 +96,11 @@ This project was built by the yakucode team for the people. Contributions are we
 - Improve documentation
 - Refactorize and optimize bad code
 
+For any contributions please refeer to the [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
-This project is published under the MIT license, this is an open source project available for educational and investigation purposes.
+The project is published under the GPL license, this is an open source project available for educational and investigation purposes.
 
 ### This device is intended solely for experimental purposes and is not meant for any illegal activities. We do not condone unlawful behavior and strongly encourage you to use it only within the bounds of the law. 
 
@@ -124,6 +149,7 @@ To make HERMES a production-ready system, these are some basic features we SHOUL
 
 
 ### Milestone outline:
+
    - v0.1 — send and receive messages with the sx1278
    - v0.2 — Add ID system to allow specific users communication
    - v0.3 — Render messages to ili
