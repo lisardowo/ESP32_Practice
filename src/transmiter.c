@@ -1,79 +1,10 @@
+
 #include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-//#include <sx128x.h>
+#include "transmitter.h"
 
-#define MESSAGE_SIZE 280
-
-typedef int id;
+int getReceiver(int receiver_id){
 
 
-id receiver_id;
-id transmitter_id;
-char message[MESSAGE_SIZE];
-
-typedef struct{ // change struct name to something more explicit
-
-    id transmitter_id;
-    id receiver_id;
-    char message[MESSAGE_SIZE];
-    
-    //look for implemetntaion of enums in structures 
-}  device ;
-
-device debugReceiver;
-device debugSender;
-
-int sendMessage(int receiver_id, int emmisorID,char *message, device *debugSender, device *debugReceiver);
-int getReceiver();
-int validateConnection(int receiver_id, int emmisorID,char *message, device *debugSender, device *debugReceiver);
-int setMessage(char *message,device *debugReceiver );
-char* getMessage();
-
-enum metadata{
-    
-    DATE,
-    FLYTIME
-
-};
-
-int main(){
-
-
-    transmitter_id = 4;
-    receiver_id = getReceiver(); 
-    printf("Provided ID is : %d \n", receiver_id);
-
-    char* message = getMessage();
-    printf("message is : %s\n", message);
-  
-    // initialization of transmitter
-    
-    debugSender.transmitter_id = transmitter_id;
-    debugSender.receiver_id = receiver_id;
-    strncpy(debugSender.message, message, MESSAGE_SIZE);
-
-    // initialization of receiver
-    
-    debugReceiver.transmitter_id = transmitter_id;
-    debugReceiver.receiver_id = receiver_id;
-
-    
-    int succes = sendMessage(receiver_id, transmitter_id, message, &debugSender, &debugReceiver);
-
-    if(succes == 0){
-        printf("OK\n");
-    }
-    else{
-        printf("%d\n", succes);
-    }
-
-    return 0;
-}
-
-int getReceiver(){
-
-    int receiver_id;
     printf("insert an ID\n");
     scanf("%d", &receiver_id);
     printf("Receiver %d\n", receiver_id);
@@ -82,7 +13,7 @@ int getReceiver(){
 
 }
 
-char* getMessage(){
+char* getMessage(char *message){
     
     printf("provide the message : \n");
     scanf("%*c");
