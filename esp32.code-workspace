@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Programacion/Proyectos/esp32"
+		},
+		{
+			"name": "CombatDiary",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

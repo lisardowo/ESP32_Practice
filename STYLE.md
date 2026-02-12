@@ -22,7 +22,7 @@ Try to avoid one letter variables.
 
 ## Naming
 
-### Type names are snake_case
+### variables are snake_case
 
 Examples:
 
