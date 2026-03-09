@@ -48,7 +48,7 @@ static const char *TAG = "ILI9341_DRV";
 #define ILI9341_PIN_MISO   19
 #define ILI9341_PIN_MOSI   23
 #define ILI9341_PIN_CLK    18
-#define ILI9341_PIN_CS     15
+#define ILI9341_PIN_CS     5
 #define ILI9341_PIN_DC     2
 #define ILI9341_PIN_RST    4
 #define ILI9341_PIN_BL     -1
