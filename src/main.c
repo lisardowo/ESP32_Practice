@@ -20,10 +20,22 @@
 #include "esp_log.h"            
 #include "esp_system.h"         
 
+#define FLAG_TODS           0x01
+#define FLAG_FROMDS         0x02
+#define FLAG_MORE_FRAG      0x04
+#define FLAG_RETRY          0x08
+#define FLAG_POWER_MGMT     0x10
+#define FLAG_MORE_DATA      0x20
+#define FLAG_WEP            0x40
+#define FLAG_ORDER          0x80
+
+
 #define DEBUG_Size 32 // Tamaño ajustado para evitar desbordamientos
+#define addresesSize 6
 
 static const char *TAG = "Artemisa"; 
 
+#define payloadHeaderSize   24
 #define MAX_CHANNELS        13      // WI-FI in 2.4GHz
 #define SCAN_TIME_MS        300     
 #define RADAR_THRESHOLD_NEAR -45     
@@ -35,16 +47,17 @@ unsigned int sourceAddress;
 unsigned int bssidSource;
 unsigned int bssidDestination;
 
-void frame_interpreter(unsigned char *payload);// Crea la structura -> la llena -> regresa la estructura llena
-void extract_protocol(unsigned char *payload);
-char extract_type(unsigned char *payload);
-char extract_subtype(unsigned char *payload);
-bool extract_toDs(unsigned char *payload);
-bool extract_fromDs(unsigned char *payload);
-bool extract_retry(unsigned char *payload);
-bool extract_powerManagement(unsigned char *payload);
-char extract_wep(unsigned char *payload);
-bool extract_order(unsigned char *payload);
+void payload_extractor(unsigned char *payload);
+void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_retry(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_powerManagement(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_wep(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_order(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean);
+
 bool is_valid_payload(int size);
 
 typedef struct __attribute__((packed)) {
@@ -97,7 +110,7 @@ void app_main(void)
     else if (set_prom == ESP_ERR_WIFI_NOT_INIT || set_prom == ESP_ERR_INVALID_ARG ){
         printf("Error %d", set_prom);
     }
-    static uint8_t ucParameterToPass;
+    static uint_least8_t ucParameterToPass;
     TaskHandle_t xHandle = NULL;
     
     xTaskCreate( Channel_Swapping , "SWAPPING", 4097, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle);
@@ -116,7 +129,7 @@ void app_main(void)
 void Channel_Swapping()
 {
     while(1){
-    for(uint8_t i = 1; i <= MAX_CHANNELS; i++) // Cambiar i > 13 a i < MAX_CHANNELS
+    for(uint_least8_t i = 1; i <= MAX_CHANNELS; i++) // Cambiar i > 13 a i < MAX_CHANNELS
     {
         printf("The value is %" PRIu8 "\n", i);
         ESP_ERROR_CHECK(esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE));
@@ -183,186 +196,205 @@ void sniffed_Packets_Handler(void* buf, wifi_promiscuous_pkt_type_t type){
    wifi_promiscuous_pkt_t *packet = (wifi_promiscuous_pkt_t *)buf;
 
     unsigned char *payload = (unsigned char *)packet->payload;
-
-    for(int i = 0 ; i < sizeof(payload) + 1;i++)
+    uint16_t payloadSize = packet->rx_ctrl.sig_len;
+    for(int i = 0 ; i < payloadSize;i++)
     {
     printf("Byte %d: 0x%02x\n", i ,(unsigned char)payload[i]); 
     }                            
-    is_valid_payload(sizeof(payload));          
+    if(is_valid_payload(payloadSize)){          
+        //extract_destinationAddress(payload);
+        payload_extractor(payload);
+    }
+}
+
+void payload_extractor(unsigned char *payload){ 
+    
+    uint_least8_t flagsBoolean = 0x00 ;  
+
+    extract_protocol(payload, &flagsBoolean);
+    extract_type(payload, &flagsBoolean);
+    extract_subtype(payload, &flagsBoolean);
+    extract_toDs(payload, &flagsBoolean);
+    extract_retry(payload, &flagsBoolean);
+    extract_powerManagement(payload, &flagsBoolean);
+    extract_wep(payload, &flagsBoolean);
+    extract_order(payload, &flagsBoolean);
+    extract_fromDs(payload, &flagsBoolean);
     extract_destinationAddress(payload);
-}
-
-void frame_interpreter(unsigned char *payload){ 
-
-    extract_protocol(payload);
-    extract_type(payload);
-    extract_subtype(payload);
-    extract_toDs(payload);
-    extract_retry(payload);
-    extract_powerManagement(payload);
-    extract_wep(payload);
-    extract_order(payload);
-    extract_fromDs(payload);
+    extract_sourceAddress(payload);
 
 }
 
 
-void extract_protocol(unsigned char *payload){
+void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControl = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0xC0; //11000000
+    unsigned char mask = 0x03; 
 
     unsigned char protocol = frameControl & mask;
 
     printf("Protocol : %X", protocol);
+
     //TODO -> DEBUG print, delete 4 production
 
 }
 
-char extract_type(unsigned char *payload){
+void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x30; //00110000
+    unsigned char mask = 0x0C; 
 
     unsigned char type = frameControlFragment & mask;
 
     printf("type : %X", type);
 
-    return 0;
+  
 }
-char extract_subtype(unsigned char *payload){
+
+void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0xF; // 00001111
+    unsigned char mask = 0xF0; 
 
     unsigned char subtype = frameControlFragment & mask;
 
-    printf("Protocol : %X", subtype);
+    printf("subtype : %X", subtype);
 
-    return 0;
+   
 }
-bool extract_toDs(unsigned char *payload){
+void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x80; // 10000000
+    unsigned char mask = 0x01; 
 
     unsigned char toDs = frameControlFragment & mask;
 
-    printf("Protocol : %X", toDs);
+    printf("toDs : %X", toDs);
 
-    return false;
+    
 }
-bool extract_fromDs(unsigned char *payload){
+void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x40; // 01000000
+    unsigned char mask = 0x02; 
 
     unsigned char fromDs = frameControlFragment & mask;
 
-    printf("Protocol : %X", fromDs);
+    printf("fromDs : %X", fromDs);
 
-    return false;
 }
-bool extract_retry(unsigned char *payload)
+
+void extract_retry(unsigned char *payload, uint_least8_t *flagsBoolean)
 {
+
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x10; // 00010000
+    unsigned char mask = 0x08; 
 
     unsigned char retry = frameControlFragment & mask;
 
-    printf("Protocol : %X", retry);
-
-    return false;
+    printf("exetract_retry : %X", retry);
+    
 }
-bool extract_powerManagement(unsigned char *payload)
+
+void extract_powerManagement(unsigned char *payload, uint_least8_t *flagsBoolean)
 {
+
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x8; // 00001000
+    unsigned char mask = 0x10; 
 
     unsigned char powerManagement = frameControlFragment & mask;
 
-    printf("Protocol : %X", powerManagement);
+    printf("power Management : %X", powerManagement);
 
-    return false;
 }
-char extract_wep(unsigned char *payload)
+
+void extract_wep(unsigned char *payload, uint_least8_t *flagsBoolean)
 {
+
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x2; // 00000001
+    unsigned char mask = 0x40; 
 
     unsigned char wep = frameControlFragment & mask;
 
-    printf("Protocol : %X", wep);    
-    return 0;
+    printf("WEP : %X", wep);    
+    
 }
-bool extract_order(unsigned char *payload)
+
+void extract_order(unsigned char *payload, uint_least8_t *flagsBoolean)
 {
     
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x1; // 00000001
+    unsigned char mask = 0x80; 
 
     unsigned char order = frameControlFragment & mask;
 
-    printf("Protocol : %X", order);
-    return false;
+    printf("Order : %X", order);
+    
 }
 
-bool is_valid_payload(int size){
-    if (size < 24) 
-    {
-        return false;
-    } 
+bool is_valid_payload(int size)
+{
+ 
+    return size >= payloadHeaderSize;
+  
 }
 
 void extract_more_frag(unsigned char *payload)
 {
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x20; // 00000001
+    unsigned char mask = 0x04; 
 
     unsigned char order = frameControlFragment & mask;
 
-    printf("Protocol : %X", order);
-    return false;
+    printf("moreFrag : %X", order);
+    
 }
 
 void extract_more_data(unsigned char *payload)
 {
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x1; // 00000001
+    unsigned char mask = 0x20; 
 
     unsigned char order = frameControlFragment & mask;
 
-    printf("Protocol : %X", order);
-    return false;
+    printf("moreData : %X", order);
+    
 }
 
-void extract_sourceAddress(unsigned char *payload){
+void extract_sourceAddress(unsigned char *payload)
+{
     
-    unsigned char destinationAddress[6];
+    unsigned char destinationAddress[addresesSize];
+    memcpy(destinationAddress, &payload[10], 6);
+    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
+    
+}
+
+void extract_destinationAddress(unsigned char *payload)
+{
+    
+    unsigned char destinationAddress[addresesSize];
     memcpy(destinationAddress, &payload[4], 6);
     printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
-    return 0;
-}
-void extract_destinationAddress(unsigned char *payload){
     
-    unsigned char destinationAddress[6];
-    memcpy(destinationAddress, &payload[9], 6);
-    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
-    return 0;// destinationAddress;
 }
-void extract_SSID(unsigned char *payload){
+
+void extract_SSID(unsigned char *payload)
+{
     
-    unsigned char SSID[6];
-    memcpy(SSID, &payload[15], 6);
+    unsigned char SSID[addresesSize];
+    memcpy(SSID, &payload[16], 6);
     printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", SSID[0], SSID[1], SSID[2],SSID[3], SSID[4] ,SSID[5]);
     
-    return 0;//SSID;
+    
 }
-void extract_senderSSID(unsigned char *payload){
+
+void extract_senderSSID(unsigned char *payload)
+{
 
     unsigned char senderSSID[6];
     memcpy(senderSSID, &payload[16], 6);
     printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", senderSSID[0], senderSSID[1], senderSSID[2],senderSSID[3], senderSSID[4] ,senderSSID[5]);
     
-    return 0 ;//senderSSID;
 }
+
