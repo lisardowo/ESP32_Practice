@@ -283,8 +283,8 @@ void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean){
     }
     printf("subtype : %X\n", subtype);
 
-   
 }
+
 void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
@@ -292,7 +292,7 @@ void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char toDs = (frameControlFragment & mask) >> normalizeFlagToDs;
 
-    if (toDs == 1){
+    if (toDs){
         *flagsBoolean |= FLAG_TODS;
     }
     
