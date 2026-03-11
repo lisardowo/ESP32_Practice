@@ -28,6 +28,12 @@
 #define FLAG_MORE_DATA           0x20
 #define FLAG_WEP                 0x40
 #define FLAG_ORDER               0x80
+#define extractToAndFromMask     0x03
+
+#define dtlFrames               0x00
+#define dsToClient              0x01
+#define clientToDS              0x02
+#define bridge                  0x03
 
 #define normalizeFlagToDs        0
 #define normalizeFlagFromDs      1
@@ -90,14 +96,6 @@ typedef struct __attribute__((packed)) {
     unsigned char Type; //funion of frame (management control or data)
     unsigned char Subtype; // indicates frame purpose (?) 0000 for association , 1000 for beacon
     uint_least8_t flagsBoolean;
-    bool toDs; // indicates destination frame
-    bool fromDs; // indicates if it comes from DS
-    bool moreFragments; // if there are any following fragments
-    bool retry; // indicates if is a retranssmission TODO -> Is it important? like security-relevant I guess
-    bool powerManagement; // true -> indicates if sender goes into power-save mode 
-    bool moreData;
-    bool order; //if true, franmes must be proccessed in strict order
-    bool webEncriptyionProtocolVersion; 
 
 }  frameControl;
 
@@ -482,7 +480,59 @@ void extract_network_name(unsigned char *payload)
 
 }
 
-void validate_beacon()
+void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload) //will take a copy of boolean flags and operate over it 
 {
+    uint_least8_t directionAndAddressing = booleanFlags & extractToAndFromMask; 
+                                        //Following is a switch case 
+                                        //that decides what type of comm is to succesfull extract all the information
+                                        //direction addressing is decided following the table found in : unnamedFolder/addresing.svg
+                                        
+    switch(directionAndAddressing){
 
+        case dtlFrames:
+
+            extract_destinationAddress(payload);
+            extract_sourceAddress(payload);
+            extract_BSSID(payload);
+
+            break;
+
+        case dsToClient:
+
+            extract_destinationAddress(payload);
+            extract_BSSID(payload);
+            extract_sourceAddress(payload);
+
+            break;
+
+        case clientToDS:
+
+            extract_BSSID(payload);
+            extract_sourceAddress(payload);
+            extract_destinationAddress(payload);
+
+            break;
+
+        case bridge: 
+
+            extract_BSSID(payload);
+            extract_sourceAddress(payload);
+            extract_destinationAddress(payload);
+            extract_addrs4(payload);
+
+
+            break;
+
+        default:
+
+            printf("unknown address type");
+            break;
+        
+
+    }
 }
+
+//void validate_beacon()
+//{
+
+//}
