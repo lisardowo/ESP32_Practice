@@ -20,26 +20,29 @@
 #include "esp_log.h"            
 #include "esp_system.h"         
 
-#define FLAG_TODS           0x01
-#define FLAG_FROMDS         0x02
-#define FLAG_MORE_FRAG      0x04
-#define FLAG_RETRY          0x08
-#define FLAG_POWER_MGMT     0x10
-#define FLAG_MORE_DATA      0x20
-#define FLAG_WEP            0x40
-#define FLAG_ORDER          0x80
+#define FLAG_TODS                0x01
+#define FLAG_FROMDS              0x02
+#define FLAG_MORE_FRAG           0x04
+#define FLAG_RETRY               0x08
+#define FLAG_POWER_MGMT          0x10
+#define FLAG_MORE_DATA           0x20
+#define FLAG_WEP                 0x40
+#define FLAG_ORDER               0x80
 
 
-#define DEBUG_Size 32 // Tamaño ajustado para evitar desbordamientos
+#define DEBUG_Size 32 
 #define addresesSize 6
 
 static const char *TAG = "Artemisa"; 
 
-#define payloadHeaderSize   24
-#define MAX_CHANNELS        13      // WI-FI in 2.4GHz
-#define SCAN_TIME_MS        300     
-#define RADAR_THRESHOLD_NEAR -45     
-#define RADAR_THRESHOLD_FAR  -85   
+#define payloadHeaderSize       24
+#define MAX_CHANNELS            13      
+#define SCAN_TIME_MS            300     
+#define RADAR_THRESHOLD_NEAR    -45     
+#define RADAR_THRESHOLD_FAR     -85   
+#define networkNameMaxLenght     33 // 32char + null terminator
+#define nameLengthbite           37
+#define nameStartBite            38
 
 unsigned int duration;
 unsigned int destinationAddress;
@@ -47,7 +50,7 @@ unsigned int sourceAddress;
 unsigned int bssidSource;
 unsigned int bssidDestination;
 
-void payload_extractor(unsigned char *payload);
+void payload_header_extractor(unsigned char *payload);
 void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean);
@@ -57,6 +60,8 @@ void extract_powerManagement(unsigned char *payload, uint_least8_t *flagsBoolean
 void extract_wep(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_order(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_network_name(unsigned char *payload);
+void validate_beacon();
 
 bool is_valid_payload(int size);
 
@@ -76,13 +81,15 @@ typedef struct __attribute__((packed)) {
     unsigned char version; //Protocol Version
     unsigned char Type; //funion of frame (management control or data)
     unsigned char Subtype; // indicates frame purpose (?) 0000 for association , 1000 for beacon
+    uint_least8_t flagsBoolean;
     bool toDs; // indicates destination frame
     bool fromDs; // indicates if it comes from DS
     bool moreFragments; // if there are any following fragments
     bool retry; // indicates if is a retranssmission TODO -> Is it important? like security-relevant I guess
     bool powerManagement; // true -> indicates if sender goes into power-save mode 
+    bool moreData;
     bool order; //if true, franmes must be proccessed in strict order
-    unsigned char webEncriptyionProtocolVersion; 
+    bool webEncriptyionProtocolVersion; 
 
 }  frameControl;
 
@@ -129,7 +136,7 @@ void app_main(void)
 void Channel_Swapping()
 {
     while(1){
-    for(uint_least8_t i = 1; i <= MAX_CHANNELS; i++) // Cambiar i > 13 a i < MAX_CHANNELS
+    for(uint_least8_t i = 1; i <= MAX_CHANNELS; i++) 
     {
         printf("The value is %" PRIu8 "\n", i);
         ESP_ERROR_CHECK(esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE));
@@ -196,18 +203,18 @@ void sniffed_Packets_Handler(void* buf, wifi_promiscuous_pkt_type_t type){
    wifi_promiscuous_pkt_t *packet = (wifi_promiscuous_pkt_t *)buf;
 
     unsigned char *payload = (unsigned char *)packet->payload;
-    uint16_t payloadSize = packet->rx_ctrl.sig_len;
-    for(int i = 0 ; i < payloadSize;i++)
-    {
-    printf("Byte %d: 0x%02x\n", i ,(unsigned char)payload[i]); 
-    }                            
-    if(is_valid_payload(payloadSize)){          
-        //extract_destinationAddress(payload);
-        payload_extractor(payload);
-    }
+    //uint16_t payloadSize = packet->rx_ctrl.sig_len;
+    //for(int i = 0 ; i < payloadSize;i++) //TODO Debug (delete 4 production) shits bugged too, payloadSize depeneds from packet lenght (header + body) instead of only header (24 bytes)
+    //{                                      //causes task watchdog (operation to slow 4 the cuantity of info, blocking cpu)
+    //printf("Byte %d: 0x%02x\n", i ,(unsigned char)payload[i]); 
+    //}
+    extract_network_name(payload);                            
+    //if(is_valid_payload(payloadSize)){          
+      //  payload_header_extractor(payload);
+    //}
 }
 
-void payload_extractor(unsigned char *payload){ 
+void payload_header_extractor(unsigned char *payload){ 
     
     uint_least8_t flagsBoolean = 0x00 ;  
 
@@ -242,9 +249,9 @@ void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean){
 void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x0C; 
+    unsigned char typeMask = 0x0C; 
 
-    unsigned char type = frameControlFragment & mask;
+    unsigned char type =(frameControlFragment & typeMask >> 2);
 
     printf("type : %X", type);
 
@@ -254,9 +261,9 @@ void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean){
 void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0xF0; 
+    unsigned char typeMask = 0xF0; 
 
-    unsigned char subtype = frameControlFragment & mask;
+    unsigned char subtype = (frameControlFragment & typeMask) >> 4;
 
     printf("subtype : %X", subtype);
 
@@ -267,7 +274,12 @@ void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean){
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
     unsigned char mask = 0x01; 
 
-    unsigned char toDs = frameControlFragment & mask;
+    unsigned char toDs = (frameControlFragment & mask) >> 7;
+
+    if (toDs == 1){
+        *flagsBoolean |= FLAG_TODS;
+    }
+    
 
     printf("toDs : %X", toDs);
 
@@ -352,6 +364,7 @@ void extract_more_frag(unsigned char *payload)
 
 void extract_more_data(unsigned char *payload)
 {
+    
     unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
     unsigned char mask = 0x20; 
 
@@ -379,22 +392,43 @@ void extract_destinationAddress(unsigned char *payload)
     
 }
 
-void extract_SSID(unsigned char *payload)
+void extract_BSSID(unsigned char *payload) 
 {
     
-    unsigned char SSID[addresesSize];
-    memcpy(SSID, &payload[16], 6);
-    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", SSID[0], SSID[1], SSID[2],SSID[3], SSID[4] ,SSID[5]);
+    unsigned char BSSID[addresesSize];
+    memcpy(BSSID, &payload[16], 6);
+    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", BSSID[0], BSSID[1], BSSID[2], BSSID[3], BSSID[4] , BSSID[5]);
     
     
 }
 
-void extract_senderSSID(unsigned char *payload)
+void extract_addrs4(unsigned char *payload) //TODO this is a provitional name. IEE 808.11 has 4 addresess, even tho fourth is barely seen
+                                            //if seen should be proccessed so function must exist
+                                            //BUT idk what it really repressents so I cant assign it a propper name yet, name shall be corrected
 {
 
-    unsigned char senderSSID[6];
-    memcpy(senderSSID, &payload[16], 6);
-    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", senderSSID[0], senderSSID[1], senderSSID[2],senderSSID[3], senderSSID[4] ,senderSSID[5]);
+    unsigned char address4[6];
+    memcpy(address4, &payload[28], 6);
+    printf("Addres : %02X:%02X:%02X:%02X:%02X:%02X\n", address4[0], address4[1], address4[2],address4[3], address4[4] ,address4[5]);
     
 }
 
+void extract_network_name(unsigned char *payload)
+{
+
+    //validate_beacon();
+
+    uint16_t nameLenght = payload[nameLengthbite];
+    printf("%d\n", nameLenght);
+    for(uint8_t i = 0 ; i < nameLenght; i++)
+    {
+        printf("%c", payload[nameStartBite + i]);
+    }
+
+
+}
+
+void validate_beacon()
+{
+
+}
