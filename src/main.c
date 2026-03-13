@@ -1,6 +1,6 @@
 /* 
   HERMES MODULE - Artemisa
-  Wifi-Sniffer
+  Wifi-Sniffer - library
  */
 
 #include <stdio.h>              
