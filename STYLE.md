@@ -20,21 +20,20 @@ It's ok if it will be long, but it should clearly state what it's doing, without
 This also applies to function/method's code.
 Try to avoid one letter variables.
 
-## Naming
+By no means magic numbers shall be used, use defines to state whatever you're doing and from where that number is coming from
 
-### variables are snake_case
-
-Examples:
-
-    receiver_id
-    transsmitter_id
-
-
-
-### Functions are camelCase
+### Functions are snake_case
 
 Examples:
 
-    getReciever()
-    sendMessage()
-    getMessage()
+    extract_toDs()
+    extract_type()
+    extract_network_name()
+    
+
+
+### variables are camelCase
+
+Examples:
+
+    

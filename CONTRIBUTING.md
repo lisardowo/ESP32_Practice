@@ -33,7 +33,7 @@ Feel free to ask questions in issues if you're not sure.
 
 #### Create a new issue
 
-If you found a problem, [search if an issue already exists](https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-issues-and-pull-requests#search-by-the-title-body-or-comments). If a related issue doesn't exist, you can open a new issue using a relevant [issue form](https://github.com/flipperdevices/flipperzero-firmware/issues/new/choose). 
+If you found a problem, [search if an issue already exists](https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-issues-and-pull-requests#search-by-the-title-body-or-comments). If a related issue doesn't exist, you can open a new issue using a relevant [issue form](https://github.com/lisardowo/HERMES/issues/new/choose). 
 
 #### Solve an issue
 
