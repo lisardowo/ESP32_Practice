@@ -80,6 +80,8 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
 
             Look for phantoms (probe request) extracting SSID of mobiles that visit 
             */
+           payload_header_extractor(payload, );
+           payload_data_walker();
             break;
         case controlFrame:
             //TODO - controlframe

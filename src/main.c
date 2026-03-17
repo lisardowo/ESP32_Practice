@@ -39,7 +39,7 @@ void app_main(void)
             */
 
 
-
+/*
 #define DSParameter     0x03
 #define TIM             0x05
 #define BSSLOAD         0x0B
@@ -87,3 +87,4 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
     }
 
 }
+*/

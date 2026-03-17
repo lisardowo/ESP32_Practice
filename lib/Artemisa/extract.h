@@ -28,7 +28,7 @@
 #define nameStartBite            38
 #define networkNameMaxLenght     33 // 32char + null terminator
 
-void payload_header_extractor(unsigned char *payload);
+void payload_header_extractor(unsigned char *payload, uint16_t payloadSize);
 void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean);
@@ -46,6 +46,7 @@ void extract_addrs4(unsigned char *payload, const char *type);
 
 void extract_network_name(unsigned char *payload);
 
+void payload_data_walker(unsigned char *payload, uint16_t totalLenght);
 
 
 

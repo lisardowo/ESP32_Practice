@@ -6,6 +6,34 @@
 #include "extract.h"
 #include "addressing.h"
 
+#define startTags       36
+#define DSParameter     0x03
+#define TIM             0x05
+#define BSSLOAD         0x0B
+#define RSN             0x30
+#define mobility        0x36
+#define WPALEGACY       0xDD
+
+//TODO refactorize 2 header files, properly allocate code based in what it does
+
+typedef struct __attribute__((packed)) {
+    uint8_t mac[6];           
+    char ssid[12];            
+    int8_t rssi;              
+    uint8_t channel;          
+    uint32_t last_seen;       
+    uint16_t packet_count;    
+    
+    struct {
+        uint8_t wps_active : 1;
+        uint8_t auth_mode  : 3; 
+        uint8_t pmf_required: 1; 
+        uint8_t is_rogue   : 1; 
+        uint8_t reserved   : 2;
+    } securityFlags;
+
+} artemisa_node_t;
+
 void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameControl = payload[0]; //Frame control is from two BYTES (so two fragments)
@@ -230,7 +258,7 @@ void extract_network_name(unsigned char *payload)
 }
 
 
-void payload_header_extractor(unsigned char *payload){ 
+void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){ 
     
 
     printf(" ===== NEW NETWORK =====\n");
@@ -238,6 +266,7 @@ void payload_header_extractor(unsigned char *payload){
     uint_least8_t flagsBoolean = 0x00 ;  
     
     extract_type(payload, &flagsBoolean);
+    payload_data_walker(payload, payloadSize);
 
     /*extract_subtype(payload, &flagsBoolean);
     extract_protocol(payload, &flagsBoolean);
@@ -259,7 +288,93 @@ void payload_header_extractor(unsigned char *payload){
 
 }
 
-void payload_data_extractor(unsigned char *payload)
+
+
+void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
 {
-    
+    uint16_t position = startTags;
+
+    while (position < totalLenght)
+    {
+
+        uint8_t tag_id = payload[position];
+        uint8_t tag_lenght = payload[position + 1];
+
+        switch(tag_id)
+        {
+            case DSParameter:
+                {
+                    unsigned char ds[tag_lenght];
+                    memcpy(ds, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%u ", ds[i]);
+                    }
+                    printf("\n");
+                    break;
+                }
+            case TIM:
+               { 
+                    unsigned char tim[tag_lenght] ;
+                    memcpy(tim, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%u ", tim[i]);
+                    }
+                    printf("\n");
+                    break;
+                }
+
+            case BSSLOAD:
+                {
+                    unsigned char bss[tag_lenght] ;
+                    memcpy(bss, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%u ", bss[i]);
+                        
+                    }
+                    printf("\n");
+                    break;
+                }
+            case RSN:
+                {
+                    unsigned char rsn[tag_lenght];
+                    memcpy(rsn, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%u ", rsn[i]);
+                    }
+                    printf("\n");
+                    break;
+                }
+
+            case mobility:
+                {   
+                    unsigned char mob[tag_lenght];
+                    memcpy(mob, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%04X ", mob[i]);
+                    }
+                    printf("\n");
+                    break;
+                }
+
+            case WPALEGACY:
+                {
+                    unsigned char wpa[tag_lenght];
+                    memcpy(wpa, &payload[position + 2], tag_lenght);
+                    for(int i = 0 ; i < tag_lenght ; i++)
+                    {
+                        printf("%02X ", wpa[i]);
+                    }
+                    printf("\n");
+                    break;
+                }
+        }
+
+        position += 2 + tag_lenght;
+    }
+
 }

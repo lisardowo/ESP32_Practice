@@ -92,7 +92,7 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
 
     if(is_valid_payload(payloadSize))
     {          
-        payload_header_extractor(payload);
+        payload_header_extractor(payload, payloadSize);
     }
 }
 
