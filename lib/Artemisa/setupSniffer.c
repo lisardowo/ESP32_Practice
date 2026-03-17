@@ -2,15 +2,38 @@
 #include "setupSniffer.h"
 #include "validate.h"
 #include "extract.h"
+#include "esp_netif.h"
+#include "esp_event.h"
 
-void channel_swapping()
+void wifi_stack_init()
+{
+    static bool init = false;
+    if (init)
+    {
+        return;
+    }
+    esp_err_t err = esp_netif_init();
+
+    if (err != ESP_OK ) 
+    {
+        ESP_ERROR_CHECK(err);
+    }
+
+     err = esp_netif_init();
+    if (err != ESP_OK ) 
+    {
+        ESP_ERROR_CHECK(err);
+    }
+}
+
+void channel_swapping(void *parametersTopass)
 {
     while(1){
     for(uint_least8_t i = 1; i <= maxChannels; i++) 
     {
         printf("The value is %" PRIu8 "\n", i);
         ESP_ERROR_CHECK(esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE));
-        vTaskDelay(3000);
+        vTaskDelay(pdMS_TO_TICKS(3000));
     }
     }
 }
@@ -29,7 +52,7 @@ void memory_initializer(){
 
 void set_promiscuous(){
 
-    vTaskDelay(pdMS_TO_TICKS(10000)); //TODO debug time -> Reduce or eliminar
+   
     printf("starting Promiscuous Setup\n");
     wifi_init_config_t config = WIFI_INIT_CONFIG_DEFAULT();
     esp_err_t err = esp_wifi_init(&config);
@@ -38,7 +61,7 @@ void set_promiscuous(){
         return;
     }
 
-    wifi_mode_t mode = WIFI_MODE_APSTA;
+    wifi_mode_t mode = WIFI_MODE_NULL;
     err = esp_wifi_set_mode(mode);
     if (err != ESP_OK) {
         printf("Error selecting Wi-Fi  mode: %d\n", err);
@@ -56,14 +79,6 @@ void set_promiscuous(){
         return;
     }
 
-
-
-    esp_err_t callback = esp_wifi_set_promiscuous_rx_cb(&sniffed_packets_handler);
-     if (callback != ESP_OK) {
-        printf("Error in callback of Sniffed Handler func: %d\n", err);
-        return;
-    }
-
     printf("promiscuous setup completed \n");
     return;
 }
@@ -78,5 +93,23 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
     if(is_valid_payload(payloadSize))
     {          
         payload_header_extractor(payload);
+    }
+}
+
+void sniffer_init(){
+
+    memory_initializer();
+    wifi_stack_init();
+    set_promiscuous();
+
+     static uint_least8_t ucParameterToPass;
+    TaskHandle_t xHandle = NULL;
+    
+    xTaskCreate( channel_swapping , "SWAPPING", 4097, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle);
+
+    esp_err_t callback = esp_wifi_set_promiscuous_rx_cb(&sniffed_packets_handler);
+     if (callback != ESP_OK) {
+        printf("Error in callback of Sniffed Handler func: %d\n", callback);
+        return;
     }
 }

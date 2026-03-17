@@ -12,7 +12,15 @@
 #include "esp_event.h"                    
 #include "esp_system.h"         
 
-#define maxChannels              13
+#define maxChannels              11
+
+//TODO 
+//IMPORTANT!! ->
+/*For some countries, only channels 1 to 11 are valid
+In most european countries, chanels up to 13 are allowed
+channel 14 is jst for japan. Change based in ur location but is not that nedeed, it will still work just fine
+
+*/
 
 typedef struct __attribute__((packed)) {
 
@@ -27,6 +35,6 @@ void memory_initializer();
 void set_promiscuous();
 void channel_swapping();
 void sniffed_packets_handler();
-
+void sniffer_init();
 
 #endif

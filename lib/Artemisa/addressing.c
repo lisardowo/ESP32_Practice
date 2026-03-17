@@ -68,13 +68,39 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
     switch(*frameType)
     {  
         case managementFrame:
-            printf("%"PRIuLEAST8, *frameType);
+            //TODO - managementFrame
+            /*
+            Overall checklist of management Frame
+            Identify beacons and search for Tag 48 looking for wpa2(secure) or
+            uses obsolete prtocols
+
+            Search for tag 221 to identify networks vulnerable to brute force
+
+            Look For subtype 12(0x0C -> deauth atack)
+
+            Look for phantoms (probe request) extracting SSID of mobiles that visit 
+            */
             break;
         case controlFrame:
-            printf("%"PRIuLEAST8, *frameType);
+            //TODO - controlframe
+            /*
+            Density identifier -> A high count of Subtype 1 movement suggest high count
+            of devices (human activity)
+            
+            Identify congestion of channel -> monitoring petitions to know how interfeered 
+            will LoRa comms be
+            */
             break;
         case dataFrame:
-            printf("%"PRIuLEAST8, *frameType);
+            //TODO - dataFrame
+            /*
+            Relations Map -> Analize MAC from origin and destiny to identify 
+            what devices are connected to what routers
+            
+            IoT Heartbeats -> look for patrons of small but constant information 
+            to identify cameras and sensors
+            
+            */
             break;
         default:
             printf("not valid data Type");

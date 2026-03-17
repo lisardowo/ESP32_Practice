@@ -233,13 +233,11 @@ void extract_network_name(unsigned char *payload)
 void payload_header_extractor(unsigned char *payload){ 
     
 
-    printf(" ===== NEW NETWORK =====\n");//TODO debug
+    printf(" ===== NEW NETWORK =====\n");
+    //TODO debug
     uint_least8_t flagsBoolean = 0x00 ;  
     
     extract_type(payload, &flagsBoolean);
-
-    
-    
 
     /*extract_subtype(payload, &flagsBoolean);
     extract_protocol(payload, &flagsBoolean);
@@ -247,6 +245,7 @@ void payload_header_extractor(unsigned char *payload){
     extract_fromDs(payload, &flagsBoolean);
    
     TODO debuggin sum stuffff
+
     type_of_addressing(flagsBoolean, payload);
     extract_retry(payload, &flagsBoolean);
     extract_powerManagement(payload, &flagsBoolean);
@@ -258,4 +257,9 @@ void payload_header_extractor(unsigned char *payload){
     flagsBoolean = 0x00; 
 
 
+}
+
+void payload_data_extractor(unsigned char *payload)
+{
+    
 }
