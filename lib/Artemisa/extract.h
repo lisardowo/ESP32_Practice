@@ -44,7 +44,7 @@ void extract_addrs2(unsigned char *payload, const char *type);
 void extract_addrs3(unsigned char *payload, const char *type);
 void extract_addrs4(unsigned char *payload, const char *type);
 
-void extract_network_name(unsigned char *payload);
+//void extract_network_name(unsigned char *payload);
 
 void payload_data_walker(unsigned char *payload, uint16_t totalLenght);
 
