@@ -17,7 +17,7 @@
 #define dataFrame               2
 
 
-void frame_type_interpreter(unsigned char *frameType ,unsigned char *payload,uint_least8_t *flagsBoolean);
+void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, uint16_t payloadSize);
 void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload);
 
 

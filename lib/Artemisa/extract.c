@@ -32,7 +32,7 @@ typedef struct __attribute__((packed)) {
         uint8_t reserved   : 2;
     } securityFlags;
 
-} artemisa_node_t;
+} identified_network;
 
 void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean){
 
@@ -47,7 +47,7 @@ void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean){
 
 }
 
-void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean){
+void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t payloadSize){
 
     
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
@@ -55,11 +55,11 @@ void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean){
 
     unsigned char frameType = (frameControlFragment & typeMask) >> 2;
 
-
-
     printf("type : %X\n", frameType);
-
-    frame_type_interpreter(&frameType ,payload, flagsBoolean);//TODO if possible id like to use the interpreter OUTSIDE this function
+    
+    frame_type_interpreter(&frameType, payload, payloadSize);
+   //TODO debugg
+   //TODO if possible id like to use the interpreter OUTSIDE this function
                                                              // , but also wanna avoid returns an stuff due to memory reasons
   
 }
@@ -265,8 +265,8 @@ void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){
     //TODO debug
     uint_least8_t flagsBoolean = 0x00 ;  
     
-    extract_type(payload, &flagsBoolean);
-    payload_data_walker(payload, payloadSize);
+    extract_type(payload, &flagsBoolean, payloadSize);
+    //payload_data_walker(payload, payloadSize);
 
     /*extract_subtype(payload, &flagsBoolean);
     extract_protocol(payload, &flagsBoolean);

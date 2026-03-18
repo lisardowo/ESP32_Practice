@@ -92,7 +92,7 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
 
     if(is_valid_payload(payloadSize))
     {          
-        payload_header_extractor(payload, payloadSize);
+        payload_header_extractor(payload,payloadSize);
     }
 }
 
@@ -102,7 +102,7 @@ void sniffer_init(){
     wifi_stack_init();
     set_promiscuous();
 
-     static uint_least8_t ucParameterToPass;
+    static uint_least8_t ucParameterToPass;
     TaskHandle_t xHandle = NULL;
     
     xTaskCreate( channel_swapping , "SWAPPING", 4097, &ucParameterToPass, tskIDLE_PRIORITY, &xHandle);

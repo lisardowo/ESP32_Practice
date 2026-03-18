@@ -30,7 +30,7 @@
 
 void payload_header_extractor(unsigned char *payload, uint16_t payloadSize);
 void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean);
-void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean);
+void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t payloadSize);
 void extract_subtype(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_retry(unsigned char *payload, uint_least8_t *flagsBoolean);
