@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "fillStruct.h"
+#include "networkStruct.h"
 #include "validate.h"
 #include "extract.h"
 #include "addressing.h"
@@ -215,50 +215,29 @@ void extract_addrs1(unsigned char *payload, const char *type)
 void extract_addrs2(unsigned char *payload, const char *type)
 {
     
-    unsigned char destinationAddress[addresesSize];
-    memcpy(destinationAddress, &payload[4], 6);
-    printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n",type, destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
+    unsigned char address2[addresesSize];
+    memcpy(address2, &payload[4], 6);
+    printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n",type, address2[0], address2[1], address2[2],address2[3], address2[4] ,address2[5]);
     
 }
 
 void extract_addrs3(unsigned char *payload, const char *type) 
 {
     
-    unsigned char BSSID[addresesSize];
-    memcpy(BSSID, &payload[16], 6);
-    printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n", type,BSSID[0], BSSID[1], BSSID[2], BSSID[3], BSSID[4] , BSSID[5]);
+    unsigned char addres3[addresesSize];
+    memcpy(addres3, &payload[16], 6);
+    printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n", type,addres3[0], addres3[1], addres3[2], addres3[3], addres3[4] , addres3[5]);
     
 }
 
 void extract_addrs4(unsigned char *payload, const char *type)
 {
 
-    unsigned char address4[6];
+    unsigned char address4[addresesSize];
     memcpy(address4, &payload[28], 6);
     printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n",type, address4[0], address4[1], address4[2],address4[3], address4[4] ,address4[5]);
     
 }
-/*
-void extract_network_name(unsigned char *payload)
-{
-
-
-    uint16_t nameLenght = payload[nameLengthbite];
-    
-    for(uint8_t i = 0 ; i < nameLenght; i++)
-    {
-        if(i < networkNameMaxLenght) // TODO trying to avoid buffer overflows -> Prob need some work
-        {
-            printf("%c", payload[nameStartBite + i]);
-        } 
-    }
-    printf("\n");
-    
-
-}
-TODO working to delete extract_network_name*/
-
-//TODO debug struct
 
 
 void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){ 
@@ -270,11 +249,10 @@ void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){
     
     extract_type(payload, &flagsBoolean, payloadSize);
     //payload_data_walker(payload, payloadSize);
-    //extract_network_name(payload);
     extract_subtype(payload, &flagsBoolean);
-    extract_protocol(payload, &flagsBoolean);
+    /* extract_protocol(payload, &flagsBoolean);
     extract_toDs(payload, &flagsBoolean);
-    extract_fromDs(payload, &flagsBoolean);
+    extract_fromDs(payload, &flagsBoolean); 
    
     //TODO debuggin sum stuffff
 
@@ -282,7 +260,7 @@ void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){
     extract_retry(payload, &flagsBoolean);
     extract_powerManagement(payload, &flagsBoolean);
     extract_wep(payload, &flagsBoolean);
-    extract_order(payload, &flagsBoolean);
+    extract_order(payload, &flagsBoolean);*/
     
     printf("\n===== END OF NETWORK ======\n");//TODO -- debug
 
@@ -315,8 +293,8 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
             {
                 unsigned char ssid[tag_lenght];
                     memcpy(ssid, &payload[position + 2], tag_lenght);
-                    printf("name : ");
-                    printf("%.*s", (int)tag_lenght, (char *)ssid);
+                    fill_ssid(&testNetwork , ssid);
+                    printf("name : %.*s", (int)tag_lenght, (char *)ssid);
                     printf("\n");
                     break;
             }

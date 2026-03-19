@@ -1,0 +1,41 @@
+#ifndef NETWORKSTRUCT_H
+#define NETWORKSTRUCT_H
+
+#define macMaxSize 6
+#define ssidMaxSizeStruct 12
+
+typedef struct __attribute__((packed)) {
+
+    unsigned char mac[macMaxSize];           
+    unsigned char ssid[ssidMaxSizeStruct];            
+    int8_t rssi;              
+    uint8_t channel;          
+    uint32_t lastSeen;       
+    uint16_t packetCount;    
+    
+    struct {
+        uint8_t wpsActive : 1;
+        uint8_t authMode  : 3; 
+        uint8_t pmfRequired: 1; 
+        uint8_t isRogue   : 1; 
+        uint8_t reserved   : 2;
+    } securityFlags;
+
+} identified_network;
+
+void fill_mac(identified_network *identified_network, unsigned char *mac);
+void fill_ssid(identified_network *identified_network, unsigned char *networkName);
+void fill_rssi(identified_network *identified_network, int8_t *rssi);
+void fill_channel(identified_network *identified_network, uint8_t *channel);
+void fill_lastSeen(identified_network *identified_network, uint32_t *lastSeen);
+void fill_packetCount(identified_network *identified_network, uint16_t *packetCount);
+void fill_wpsActive(identified_network *identified_network, unsigned char *wpsActive);
+void fill_authMode(identified_network *identified_network, unsigned char *authMode);
+void fill_pmfRequired(identified_network *identified_network, unsigned char *pmfRequired);
+void fill_isRogue(identified_network *identified_network, unsigned char *isRogue);
+void fill_reserved(identified_network *identified_network, unsigned char *reserved);
+
+
+
+
+#endif
