@@ -96,6 +96,13 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
     }
 }
 
+void payload_interpreter(unsigned char *payload, uint16_t payloadSize){
+
+    payload_header_extractor(payload , payloadSize);
+    payload_data_walker(payload , payloadSize);
+
+}
+
 void sniffer_init(){
 
     memory_initializer();

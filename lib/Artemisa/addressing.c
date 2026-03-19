@@ -21,7 +21,7 @@ void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload)
             extract_addrs1(payload, "Dest MAC");
             extract_addrs2(payload, "src Mac");
             extract_addrs3(payload, "BSSID");
-
+            
             break;
 
         case dsToClient:

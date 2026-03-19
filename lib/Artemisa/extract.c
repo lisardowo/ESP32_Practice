@@ -16,6 +16,7 @@
 #define mobility        0x36
 #define WPALEGACY       0xDD
 
+identified_network testNetwork; //TODO debug -> delete
 //TODO refactorize 2 header files, properly allocate code based in what it does
 
 
@@ -205,6 +206,8 @@ void extract_addrs1(unsigned char *payload, const char *type)
     
     unsigned char destinationAddress[addresesSize];
     memcpy(destinationAddress, &payload[10], 6);
+    fill_mac(&testNetwork, destinationAddress);//TODO -> this is working but im not 100% sure why, check later
+    //TODO fill mac shall be inside extract_addrs copying destination address instead of payload
     printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n", type, destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
     
 }
@@ -256,7 +259,7 @@ void extract_network_name(unsigned char *payload)
 TODO working to delete extract_network_name*/
 
 //TODO debug struct
-identified_network testNetwork;
+
 
 void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){ 
     
@@ -280,7 +283,7 @@ void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){
     extract_powerManagement(payload, &flagsBoolean);
     extract_wep(payload, &flagsBoolean);
     extract_order(payload, &flagsBoolean);
-    fill_mac(&testNetwork, &payload[16]);//TODO -> this is working but im not 100% sure why, check later
+    
     printf("\n===== END OF NETWORK ======\n");//TODO -- debug
 
     flagsBoolean = 0x00; 
@@ -294,11 +297,16 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
 {
     uint16_t position = startTags;
 
-    while (position < totalLenght)
+    while (position + 2 < totalLenght)
     {
 
         uint8_t tag_id = payload[position];
         uint8_t tag_lenght = payload[position + 1];
+        
+        if ((uint32_t)position + 2u + tag_lenght > totalLenght) 
+        {
+            break; 
+        }
 
         switch(tag_id)
         {
@@ -307,10 +315,8 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
             {
                 unsigned char ssid[tag_lenght];
                     memcpy(ssid, &payload[position + 2], tag_lenght);
-                    for(int i = 0 ; i < tag_lenght ; i++)
-                    {
-                        printf("%c", ssid[i]);
-                    }
+                    printf("name : ");
+                    printf("%.*s", (int)tag_lenght, (char *)ssid);
                     printf("\n");
                     break;
             }
@@ -319,6 +325,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                 {
                     unsigned char ds[tag_lenght];
                     memcpy(ds, &payload[position + 2], tag_lenght);
+                    printf("DS param : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
                         printf("%u ", ds[i]);
@@ -330,9 +337,10 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                { 
                     unsigned char tim[tag_lenght] ;
                     memcpy(tim, &payload[position + 2], tag_lenght);
+                    printf("TIM : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
-                        printf("%u ", tim[i]);
+                        printf("%02X ", tim[i]);
                     }
                     printf("\n");
                     break;
@@ -342,6 +350,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                 {
                     unsigned char bss[tag_lenght] ;
                     memcpy(bss, &payload[position + 2], tag_lenght);
+                    printf("BSS Load : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
                         printf("%u ", bss[i]);
@@ -354,6 +363,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                 {
                     unsigned char rsn[tag_lenght];
                     memcpy(rsn, &payload[position + 2], tag_lenght);
+                    printf("RSN : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
                         printf("%u ", rsn[i]);
@@ -366,6 +376,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                 {   
                     unsigned char mob[tag_lenght];
                     memcpy(mob, &payload[position + 2], tag_lenght);
+                    printf("Mobility : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
                         printf("%04X ", mob[i]);
@@ -378,6 +389,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                 {
                     unsigned char wpa[tag_lenght];
                     memcpy(wpa, &payload[position + 2], tag_lenght);
+                    printf("WPA Legacy : ");
                     for(int i = 0 ; i < tag_lenght ; i++)
                     {
                         printf("%02X ", wpa[i]);

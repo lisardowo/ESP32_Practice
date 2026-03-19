@@ -31,6 +31,7 @@ typedef struct __attribute__((packed)) {
 
 }  frameControl;
 
+void payload_interpreter(unsigned char *payload, uint16_t payloadSize);
 void memory_initializer();
 void set_promiscuous();
 void channel_swapping();
