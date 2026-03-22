@@ -13,8 +13,8 @@
 
 typedef struct __attribute__((packed)) {
 
-    unsigned char mac[macMaxSize];           
-    unsigned char ssid[ssidMaxSizeStruct];            
+    char ssid[ssidMaxSizeStruct]; // tried to use unsigned char jst to keep all the same but strcpy a biiiitch            
+    unsigned char mac[macMaxSize];            
     int8_t rssi;              
     uint8_t channel;          
     uint32_t lastSeen;       
@@ -31,7 +31,7 @@ typedef struct __attribute__((packed)) {
 } identified_network;
 
 void fill_mac(identified_network *identified_network, unsigned char *mac);
-void fill_ssid(identified_network *identified_network, unsigned char *networkName);
+void fill_ssid(identified_network *identified_network, unsigned char *networkName,uint8_t tagLength);
 void fill_rssi(identified_network *identified_network, uint8_t *rssi);
 void fill_channel(identified_network *identified_network, uint8_t *channel);
 void fill_lastSeen(identified_network *identified_network, uint32_t *lastSeen);
@@ -41,7 +41,7 @@ void fill_authMode(identified_network *identified_network, unsigned char *authMo
 void fill_pmfRequired(identified_network *identified_network, unsigned char *pmfRequired);
 void fill_isRogue(identified_network *identified_network, unsigned char *isRogue);
 void fill_reserved(identified_network *identified_network, unsigned char *reserved);
-
+void DEBUGSHOWSTRUCT(identified_network *identified_network);
 
 
 

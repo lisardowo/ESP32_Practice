@@ -30,8 +30,13 @@ void fill_mac(identified_network *identified_network, unsigned char *mac)
     
 
 }
-void fill_ssid(identified_network *identified_network, unsigned char *networkName)
-{
+void fill_ssid(identified_network *identified_network, unsigned char *networkName, uint8_t tagLength)
+{   
+    if (tagLength == 0)
+    {
+        strcpy(identified_network->ssid, "Hide network");
+        return;
+    }
     memcpy(identified_network->ssid, networkName ,ssidMaxSizeStruct-2 );//leaves one char for null terminator
     identified_network->ssid[ssidMaxSizeStruct-1] = 0; //fill last char with null terminator
 }
@@ -89,7 +94,9 @@ void DEBUGSHOWSTRUCT(identified_network *identified_network)
     printf("isRogue : %u", identified_network->securityFlags.isRogue); 
     printf("reserved : %u", identified_network->securityFlags.reserved);
 }
+void create_new_network(){
 
+}
 void find_networkStruct()
 {
     //TODO implement a hash table for quick search

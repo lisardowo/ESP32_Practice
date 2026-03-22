@@ -292,8 +292,8 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
             case SSID: 
             {
                     
-                    fill_ssid(&testNetwork , &payload[position + 2]);
-                    //printf("name : %.*s", (int)tag_lenght, (char *)ssid);
+                    fill_ssid(&testNetwork , &payload[position + 2], tagLenght);
+                    
                     printf("\n");
                     break;
             }
@@ -347,6 +347,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                         break;
                 }
 
+            /*TODO i think that mobility is also not neccesary
             case mobility:
                 {   
                     unsigned char mob[tagLenght];
@@ -358,7 +359,7 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                     }
                    printf("\n");
                     break;
-                }
+                }*/
 
             case WPALEGACY:
                 {
@@ -371,8 +372,8 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
                     break;
                 }
         }
-
+        
         position += 2 + tagLenght;
     }
-
+    DEBUGSHOWSTRUCT(&testNetwork);
 }
