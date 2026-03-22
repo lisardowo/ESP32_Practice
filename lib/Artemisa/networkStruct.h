@@ -1,17 +1,28 @@
 #ifndef NETWORKSTRUCT_H
 #define NETWORKSTRUCT_H
 
-#define macMaxSize 6
-#define ssidMaxSizeStruct 24
+#include <stdbool.h>
+#include "hashing.h"
+#include "esp_timer.h"
 
-#define contentTag 2        //TODO move repetitive tags to a global define header
-#define suiteSelectorsSize 4
-#define suiteType       3
+#define macMaxSize               6
+#define ssidMaxSizeStruct        24
+
+#define contentTag               2//TODO move repetitive tags to a global define header
+#define suiteSelectorsSize       4
+#define suiteType                3
 #define normalizeSplitTag        8
 #define defaultWpaMode           2
 #define normalizePmf             0x0080
+#define timeout                  60000
 
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed)) identified_network {
+
+    struct identified_network *next;
+    struct identified_network *previous;
+    struct identified_network *hashNext;
+
+    //relevant pointers 4 hashing
 
     char ssid[ssidMaxSizeStruct]; // tried to use unsigned char jst to keep all the same but strcpy a biiiitch            
     unsigned char mac[macMaxSize];            
@@ -43,6 +54,17 @@ void fill_isRogue(identified_network *identified_network, unsigned char *isRogue
 void fill_reserved(identified_network *identified_network, unsigned char *reserved);
 void DEBUGSHOWSTRUCT(identified_network *identified_network);
 
+void create_new_network();
+identified_network* find_network();
+void delete_old_networks();
+void update_networks();
 
+uint32_t get_time_ms(); //TODO not sure if this belongs here, i may move it
+
+
+identified_network* hashTable[hashSize] = {NULL};
+identified_network* head = NULL; 
+identified_network* tail = NULL;
+uint8_t networkCount = 0;
 
 #endif

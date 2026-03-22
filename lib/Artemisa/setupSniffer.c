@@ -1,4 +1,5 @@
 
+#include "networkStruct.h"
 #include "setupSniffer.h"
 #include "validate.h"
 #include "extract.h"
@@ -85,6 +86,11 @@ void set_promiscuous(){
 
 void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
     
+    if(!find_network)
+    {
+        create_new_network();
+    }
+
    wifi_promiscuous_pkt_t *packet = (wifi_promiscuous_pkt_t *)buf;
 
     unsigned char *payload = (unsigned char *)packet->payload;
@@ -120,3 +126,5 @@ void sniffer_init(){
         return;
     }
 }
+
+
