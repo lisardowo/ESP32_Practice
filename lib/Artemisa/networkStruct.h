@@ -2,7 +2,14 @@
 #define NETWORKSTRUCT_H
 
 #define macMaxSize 6
-#define ssidMaxSizeStruct 12
+#define ssidMaxSizeStruct 24
+
+#define contentTag 2        //TODO move repetitive tags to a global define header
+#define suiteSelectorsSize 4
+#define suiteType       3
+#define normalizeSplitTag        8
+#define defaultWpaMode           2
+#define normalizePmf             0x0080
 
 typedef struct __attribute__((packed)) {
 
@@ -25,7 +32,7 @@ typedef struct __attribute__((packed)) {
 
 void fill_mac(identified_network *identified_network, unsigned char *mac);
 void fill_ssid(identified_network *identified_network, unsigned char *networkName);
-void fill_rssi(identified_network *identified_network, int8_t *rssi);
+void fill_rssi(identified_network *identified_network, uint8_t *rssi);
 void fill_channel(identified_network *identified_network, uint8_t *channel);
 void fill_lastSeen(identified_network *identified_network, uint32_t *lastSeen);
 void fill_packetCount(identified_network *identified_network, uint16_t *packetCount);

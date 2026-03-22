@@ -5,6 +5,24 @@
 #include "networkStruct.h"
 #include <inttypes.h>
 
+/* void fill_struct(identified_network *identifiedNetwork, unsigned char *pmfRequired, uint32_t *lastSeen ,unsigned char *mac,unsigned char *networkName, unsigned char *channel  , uint8_t *rssi , unsigned char *authMode, unsigned char *reserved, uint16_t *packetCount, unsigned char *isRogue, unsigned char *wpsActive)
+{
+    
+    identified_network debugStruct2;//TODO debug struct
+
+    fill_authMode(&debugStruct2, authMode);
+    fill_channel(&debugStruct2, channel);
+    fill_isRogue(&debugStruct2,isRogue);
+    fill_lastSeen(&debugStruct2,lastSeen);
+    fill_mac(&debugStruct2, mac);
+    fill_packetCount(&debugStruct2,packetCount);
+    fill_pmfRequired(&debugStruct2,pmfRequired);
+    fill_reserved(&debugStruct2,reserved); //TODO addres of operation is for debug (since the nerwokr is created in scope) so it shall be eliminated for prod 
+    fill_rssi(&debugStruct2,rssi);
+    fill_ssid(&debugStruct2,networkName);
+    fill_wpsActive(&debugStruct2,wpsActive);
+    DEBUGSHOWSTRUCT(&debugStruct2);//TODO -> DEBUG show filled debug struct
+} */
 
 void fill_mac(identified_network *identified_network, unsigned char *mac)
 {
@@ -14,10 +32,10 @@ void fill_mac(identified_network *identified_network, unsigned char *mac)
 }
 void fill_ssid(identified_network *identified_network, unsigned char *networkName)
 {
-    memcpy(identified_network->ssid, networkName ,ssidMaxSizeStruct-1 );
-    identified_network->ssid[ssidMaxSizeStruct] = 0;
+    memcpy(identified_network->ssid, networkName ,ssidMaxSizeStruct-2 );//leaves one char for null terminator
+    identified_network->ssid[ssidMaxSizeStruct-1] = 0; //fill last char with null terminator
 }
-void fill_rssi(identified_network *identified_network, int8_t *rssi)
+void fill_rssi(identified_network *identified_network, uint8_t *rssi)
 {
      identified_network->rssi = *rssi;
 }

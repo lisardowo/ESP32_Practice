@@ -1,8 +1,9 @@
 
 #include "addressing.h"
 #include "extract.h"
+#include "networkStruct.h"
 
-void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload) 
+void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload, identified_network *identifiedNetwork) 
 {
 
 
@@ -21,7 +22,7 @@ void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload)
             extract_addrs1(payload, "Dest MAC");
             extract_addrs2(payload, "src Mac");
             extract_addrs3(payload, "BSSID");
-            
+            fill_mac(identifiedNetwork, &payload[10]);//TODO -> this is working but im not 100% sure why, check later
             break;
 
         case dsToClient:
@@ -30,7 +31,7 @@ void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload)
             extract_addrs1(payload, "Dest MAC");
             extract_addrs2(payload,"BSSID");
             extract_addrs3(payload,"Src Mac");
-
+            fill_mac(identifiedNetwork, &payload[10]);
             break;
 
         case clientToDS:
@@ -39,7 +40,7 @@ void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload)
             extract_addrs1(payload, "BBSID");
             extract_addrs2(payload, "Src Mac");
             extract_addrs3(payload, "Dest Mac");
-
+            fill_mac(identifiedNetwork, &payload[16]);
             break;
 
         case bridge: 
@@ -49,7 +50,7 @@ void type_of_addressing(uint_least8_t booleanFlags, unsigned char *payload)
             extract_addrs2(payload, "Src Radio");
             extract_addrs3(payload, "Dest Mac");
             extract_addrs4(payload, "Src Mac");
-
+            fill_mac(identifiedNetwork, &payload[28]);
 
             break;
 
@@ -84,6 +85,7 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
            payload_data_walker(payload, payloadSize);
             break;
         case controlFrame:
+            printf("control\n");
             //TODO - controlframe
             /*
             Density identifier -> A high count of Subtype 1 movement suggest high count
@@ -95,6 +97,7 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
             break;
         case dataFrame:
             //TODO - dataFrame
+            printf("dataframe\n");
             /*
             Relations Map -> Analize MAC from origin and destiny to identify 
             what devices are connected to what routers
@@ -105,7 +108,7 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
             */
             break;
         default:
-            printf("not valid data Type");
+            printf("not valid data Type\n");
             break;
         
     }

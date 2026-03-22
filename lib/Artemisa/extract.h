@@ -5,6 +5,23 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+
+#define contentTag 2        //TODO move repetitive tags to a global define header
+#define suiteSelectorsSize 4
+#define suiteType       3
+#define normalizeSplitTag        8
+#define defaultWpaMode           2
+#define normalizePmf             0x0080
+//TODO i have to move tis
+
+#define vendorTagPosition1  0x00
+#define vendorTagPosition2  0x50
+#define vendorTagPosition3  0xF2
+#define vendorTagPosition4  0x04
+
+#define lengthTag                1
+#define ContentTag               2
+
 #define normalizeFlagToDs        0
 #define normalizeFlagFromDs      1
 #define normalizeFlagMoreFrag    2
@@ -13,6 +30,7 @@
 #define normalizeFlagMoreData    5
 #define normalizeFlagWep         6
 #define normalizeFlagOrder       7
+#define normalizeSplitTag        8
 
 #define flagToDs                 0x01
 #define flagFromDs               0x02

@@ -206,7 +206,7 @@ void extract_addrs1(unsigned char *payload, const char *type)
     
     unsigned char destinationAddress[addresesSize];
     memcpy(destinationAddress, &payload[10], 6);
-    fill_mac(&testNetwork, destinationAddress);//TODO -> this is working but im not 100% sure why, check later
+    
     //TODO fill mac shall be inside extract_addrs copying destination address instead of payload
     printf("%s : %02X:%02X:%02X:%02X:%02X:%02X\n", type, destinationAddress[0], destinationAddress[1], destinationAddress[2],destinationAddress[3], destinationAddress[4] ,destinationAddress[5]);
     
@@ -278,84 +278,81 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
     while (position + 2 < totalLenght)
     {
 
-        uint8_t tag_id = payload[position];
-        uint8_t tag_lenght = payload[position + 1];
+        uint8_t tagId = payload[position];
+        uint8_t tagLenght = payload[position + 1];
         
-        if ((uint32_t)position + 2u + tag_lenght > totalLenght) 
+        if ((uint32_t)position + 2u + tagLenght > totalLenght) 
         {
             break; 
         }
 
-        switch(tag_id)
+        switch(tagId)
         {
             
             case SSID: 
             {
-                unsigned char ssid[tag_lenght];
-                    memcpy(ssid, &payload[position + 2], tag_lenght);
-                    fill_ssid(&testNetwork , ssid);
-                    printf("name : %.*s", (int)tag_lenght, (char *)ssid);
+                    
+                    fill_ssid(&testNetwork , &payload[position + 2]);
+                    //printf("name : %.*s", (int)tag_lenght, (char *)ssid);
                     printf("\n");
                     break;
             }
 
             case DSParameter:
                 {
-                    unsigned char ds[tag_lenght];
-                    memcpy(ds, &payload[position + 2], tag_lenght);
-                    printf("DS param : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
-                    {
-                        printf("%u ", ds[i]);
-                    }
-                    printf("\n");
+                    uint8_t channel = payload[position + 2];
+                    fill_channel(&testNetwork, &channel);
+                    //printf("DS param : ");
                     break;
                 }
-            case TIM:
+          /* TODO is case tim really needed? 
+          case TIM:
                { 
                     unsigned char tim[tag_lenght] ;
                     memcpy(tim, &payload[position + 2], tag_lenght);
-                    printf("TIM : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
-                    {
-                        printf("%02X ", tim[i]);
-                    }
+    
                     printf("\n");
                     break;
-                }
+                }*/
 
             case BSSLOAD:
                 {
-                    unsigned char bss[tag_lenght] ;
-                    memcpy(bss, &payload[position + 2], tag_lenght);
-                    printf("BSS Load : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
-                    {
-                        printf("%u ", bss[i]);
-                        
-                    }
-                    printf("\n");
+                    uint16_t packetCount = payload[position + ContentTag] | (payload[position + (ContentTag + 1)]) << normalizeSplitTag ;
+                    fill_packetCount(&testNetwork, &packetCount);
                     break;
                 }
+                
             case RSN:
                 {
-                    unsigned char rsn[tag_lenght];
-                    memcpy(rsn, &payload[position + 2], tag_lenght);
-                    printf("RSN : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
-                    {
-                        printf("%u ", rsn[i]);
-                    }
-                    printf("\n");
-                    break;
+                       uint8_t *rsnData = &payload[position + contentTag];
+                        int jumpVersion = 6;
+                        uint16_t pairwiseCipherCount = rsnData[jumpVersion] | (rsnData[jumpVersion + 1] << 8);
+                        uint8_t currentPosition = jumpVersion + contentTag + (pairwiseCipherCount * suiteSelectorsSize);
+                        uint16_t akmCount = rsnData[currentPosition] | ( rsnData[currentPosition + 1] << normalizeSplitTag);
+                        currentPosition += contentTag;
+                        uint8_t *firstAkm = &rsnData[currentPosition];
+                        uint8_t mode = defaultWpaMode;
+
+                        if (firstAkm[suiteType] == 8 || firstAkm[suiteType] == 18)
+                        {
+                            mode = 3;
+                        }
+                        fill_authMode(&testNetwork, &mode);
+
+                        currentPosition += (akmCount * suiteSelectorsSize);
+                        uint16_t rsnCaps = rsnData[currentPosition] | (rsnData[currentPosition + 1] << 8 );
+                        uint8_t pmf = (rsnCaps & normalizePmf) >> 7 ;
+
+                        fill_pmfRequired(&testNetwork, &pmf);
+                        break;
                 }
 
             case mobility:
                 {   
-                    unsigned char mob[tag_lenght];
-                    memcpy(mob, &payload[position + 2], tag_lenght);
+                    unsigned char mob[tagLenght];
+                    memcpy(mob, &payload[position + 2], tagLenght);
                     printf("Mobility : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
+                    for(int i = 0 ; i < tagLenght ; i++)
                     {
                         printf("%04X ", mob[i]);
                     }
@@ -365,19 +362,17 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght)
 
             case WPALEGACY:
                 {
-                    unsigned char wpa[tag_lenght];
-                    memcpy(wpa, &payload[position + 2], tag_lenght);
-                    printf("WPA Legacy : ");
-                    for(int i = 0 ; i < tag_lenght ; i++)
+                    uint8_t *vendor = &payload[position + contentTag];
+                    if (tagLenght >= 4 && vendor[0] == vendorTagPosition1 && vendor[1] == vendorTagPosition2 && vendor[2] == vendorTagPosition3 && vendor[3] == vendorTagPosition4)
                     {
-                        printf("%02X ", wpa[i]);
+                        uint8_t wps = 1;
+                        fill_wpsActive(&testNetwork,&wps);
                     }
-                    printf("\n");
                     break;
                 }
         }
 
-        position += 2 + tag_lenght;
+        position += 2 + tagLenght;
     }
 
 }
