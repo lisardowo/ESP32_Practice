@@ -5,4 +5,4 @@
 
 #define hashSize    64
 
-uint8_t convert_to_hash();
+uint8_t convert_to_hash(unsigned char *mac);

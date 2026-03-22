@@ -36,7 +36,7 @@ void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean)
 
 }
 
-void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t payloadSize)
+void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t payloadSize, identified_network *newNetwork)
 {
 
     
@@ -47,7 +47,7 @@ void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t 
 
     printf("type : %X\n", frameType);
     
-    frame_type_interpreter(&frameType, payload, payloadSize);
+    frame_type_interpreter(&frameType, payload, payloadSize, newNetwork);
    //TODO debugg
    //TODO if possible id like to use the interpreter OUTSIDE this function
                                                              // , but also wanna avoid returns an stuff due to memory reasons
@@ -240,30 +240,41 @@ void extract_addrs4(unsigned char *payload, const char *type)
 }
 
 
-void payload_header_extractor(unsigned char *payload, uint16_t payloadSize){ 
+void payload_header_extractor(unsigned char *payload, uint16_t payloadSize, uint8_t rssi)
+{ 
     
 
     printf(" ===== NEW NETWORK =====\n");
     //TODO debug
     uint_least8_t flagsBoolean = 0x00 ;  
     
-    extract_type(payload, &flagsBoolean, payloadSize);
-    //payload_data_walker(payload, payloadSize);
-    extract_subtype(payload, &flagsBoolean);
-    /* extract_protocol(payload, &flagsBoolean);
     extract_toDs(payload, &flagsBoolean);
-    extract_fromDs(payload, &flagsBoolean); 
-   
-    //TODO debuggin sum stuffff
-
-    type_of_addressing(flagsBoolean, payload);
-    extract_retry(payload, &flagsBoolean);
-    extract_powerManagement(payload, &flagsBoolean);
-    extract_wep(payload, &flagsBoolean);
-    extract_order(payload, &flagsBoolean);*/
+    extract_fromDs(payload, &flagsBoolean);
     
-    printf("\n===== END OF NETWORK ======\n");//TODO -- debug
+    //TODO following this comment youll find the LAMEST patch ever created
+    //im way too tired for this shit
+    //instead of reusing the functions I already worked my ass off ill just re do it here cuz otherwise wont work
+    //ill check that later
+    unsigned char srcMac[macMaxSize];
+    uint_least8_t direction = flagsBoolean & extractToAndFromMask;
+    unsigned char *macAddress = type_of_addressing(direction, payload);
 
+    identified_network *newNetwork = find_network(macAddress);
+
+    uint32_t now = get_time_ms();
+
+    if(newNetwork)
+    {
+        update_network(newNetwork, rssi, now);
+    }
+    else
+    {
+        create_new_network(srcMac, rssi, (unsigned char*)"PlaceHolder name..", 0 , 11);
+        newNetwork = head; 
+    }
+
+    extract_type(payload, &flagsBoolean, payloadSize, newNetwork);
+    //TODO still a lot of stuff to correct
     flagsBoolean = 0x00; 
 
 

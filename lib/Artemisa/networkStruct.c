@@ -24,10 +24,9 @@
     DEBUGSHOWSTRUCT(&debugStruct2);//TODO -> DEBUG show filled debug struct
 } */
 
-void fill_mac(identified_network *identified_network, unsigned char *mac)
+unsigned char* fill_mac(identified_network *identified_network, unsigned char *mac)
 {
-    memcpy(identified_network->mac, mac ,macMaxSize);
-    
+    return memcpy(identified_network->mac, mac ,macMaxSize);
 
 }
 void fill_ssid(identified_network *identified_network, unsigned char *networkName, uint8_t tagLength)
@@ -109,7 +108,7 @@ void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, 
     uint32_t now = get_time_ms();
     uint16_t initialCount = 1;
     fill_lastSeen(newNetwork, &now);
-    fill_packetCount(newNetwork, initialCount);
+    //fill_packetCount(newNetwork, initialCount);
 
     uint8_t index = convert_to_hash(mac);
     newNetwork->hashNext = hashTable[index];
@@ -132,7 +131,7 @@ void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, 
 identified_network* find_network(unsigned char *mac)
 {
     //TODO implement a hash table for quick search
-    uint8_t index = convert_to_hash();
+    uint8_t index = convert_to_hash(mac);
     identified_network *currentNetwork = hashTable[index];
 
     while(currentNetwork != NULL)
@@ -154,7 +153,7 @@ void delete_old_networks()
 
     while (current != NULL)
     {
-        if ((now - current->lastSeen) > timeout)
+        if ((now - current->lastSeen) > networkTimeout)
         {
             identified_network *toDelete = current;
             current = current->previous;

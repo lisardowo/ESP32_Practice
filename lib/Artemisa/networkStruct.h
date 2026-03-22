@@ -14,23 +14,25 @@
 #define normalizeSplitTag        8
 #define defaultWpaMode           2
 #define normalizePmf             0x0080
-#define timeout                  60000
+#define networkTimeout           60000
 
-typedef struct __attribute__((packed)) identified_network {
+typedef struct identified_network {
 
     struct identified_network *next;
     struct identified_network *previous;
     struct identified_network *hashNext;
-
+  
+    
     //relevant pointers 4 hashing
+
+    uint32_t lastSeen;       
+    uint16_t packetCount;  
 
     char ssid[ssidMaxSizeStruct]; // tried to use unsigned char jst to keep all the same but strcpy a biiiitch            
     unsigned char mac[macMaxSize];            
     int8_t rssi;              
     uint8_t channel;          
-    uint32_t lastSeen;       
-    uint16_t packetCount;    
-    
+
     struct {
         uint8_t wpsActive : 1;
         uint8_t authMode  : 3; 
@@ -41,7 +43,7 @@ typedef struct __attribute__((packed)) identified_network {
 
 } identified_network;
 
-void fill_mac(identified_network *identified_network, unsigned char *mac);
+unsigned char* fill_mac(identified_network *identified_network, unsigned char *mac);
 void fill_ssid(identified_network *identified_network, unsigned char *networkName,uint8_t tagLength);
 void fill_rssi(identified_network *identified_network, uint8_t *rssi);
 void fill_channel(identified_network *identified_network, uint8_t *channel);
@@ -54,10 +56,11 @@ void fill_isRogue(identified_network *identified_network, unsigned char *isRogue
 void fill_reserved(identified_network *identified_network, unsigned char *reserved);
 void DEBUGSHOWSTRUCT(identified_network *identified_network);
 
-void create_new_network();
-identified_network* find_network();
+void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength);
+identified_network* find_network(unsigned char *mac);
 void delete_old_networks();
-void update_networks();
+void update_network(identified_network *network, uint8_t rssi, uint32_t timestamp);
+void delete_network(identified_network *network);
 
 uint32_t get_time_ms(); //TODO not sure if this belongs here, i may move it
 
