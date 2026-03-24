@@ -64,10 +64,9 @@ void delete_network(identified_network *network);
 
 uint32_t get_time_ms(); //TODO not sure if this belongs here, i may move it
 
+extern identified_network* hashTable[hashSize];
+extern identified_network* head; 
+extern identified_network* tail;
 
-identified_network* hashTable[hashSize] = {NULL};
-identified_network* head = NULL; 
-identified_network* tail = NULL;
-uint8_t networkCount = 0;
 
 #endif

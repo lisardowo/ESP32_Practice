@@ -5,6 +5,11 @@
 #include "networkStruct.h"
 #include <inttypes.h>
 #include "hashing.h"
+
+identified_network* hashTable[hashSize] = {NULL};
+identified_network* head = NULL; 
+identified_network* tail = NULL;
+
 /* void fill_struct(identified_network *identifiedNetwork, unsigned char *pmfRequired, uint32_t *lastSeen ,unsigned char *mac,unsigned char *networkName, unsigned char *channel  , uint8_t *rssi , unsigned char *authMode, unsigned char *reserved, uint16_t *packetCount, unsigned char *isRogue, unsigned char *wpsActive)
 {
     
@@ -33,7 +38,7 @@ void fill_ssid(identified_network *identified_network, unsigned char *networkNam
 {   
     if (tagLength == 0)
     {
-        strcpy(identified_network->ssid, "Hide network");
+        strcpy(identified_network->ssid, "Hiden network");
         return;
     }
     memcpy(identified_network->ssid, networkName ,ssidMaxSizeStruct-2 );//leaves one char for null terminator
@@ -106,7 +111,6 @@ void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, 
     fill_channel(newNetwork, &channel);
 
     uint32_t now = get_time_ms();
-    uint16_t initialCount = 1;
     fill_lastSeen(newNetwork, &now);
     //fill_packetCount(newNetwork, initialCount);
 

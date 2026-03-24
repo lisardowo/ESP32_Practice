@@ -8,14 +8,10 @@ bool is_valid_payload(int size)
   
 }
 
-bool validate_network(unsigned char *subtype)
+bool validate_network(int subtype)
 {   
 
-    if(*subtype == beacon)
-    {
-        return true;
-    }
-    return false;
+    return subtype == beacon;
 
 }
 

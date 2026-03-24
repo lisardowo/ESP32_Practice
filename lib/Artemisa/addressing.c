@@ -3,7 +3,7 @@
 #include "extract.h"
 #include "networkStruct.h"
 
-unsigned char* type_of_addressing(uint_least8_t direction, unsigned char *payload, identified_network *identifiedNetwork) 
+unsigned char* type_of_addressing(uint_least8_t direction, unsigned char *payload) 
 {
 
         
@@ -14,53 +14,17 @@ unsigned char* type_of_addressing(uint_least8_t direction, unsigned char *payloa
     switch(direction)
     {
 
-        case dtlFrames:
-
-            printf("dtlFrames\n");
-            extract_addrs1(payload, "Dest MAC");
-            extract_addrs2(payload, "src Mac");
-            extract_addrs3(payload, "BSSID");
-            return fill_mac(identifiedNetwork, &payload[10]);//TODO -> this is working but im not 100% sure why, check later
-            break;
-
-        case dsToClient:
-
-            printf("dsToClient\n");
-            extract_addrs1(payload, "Dest MAC");
-            extract_addrs2(payload,"BSSID");
-            extract_addrs3(payload,"Src Mac");
-            return fill_mac(identifiedNetwork, &payload[10]);
-            break;
-
         case clientToDS:
-
-            printf("clientToDs\n");
-            extract_addrs1(payload, "BBSID");
-            extract_addrs2(payload, "Src Mac");
-            extract_addrs3(payload, "Dest Mac");
-            return fill_mac(identifiedNetwork, &payload[16]);
-            break;
-
-        case bridge: 
-
-            printf("bridge\n");
-            extract_addrs1(payload, "Dest Radio");
-            extract_addrs2(payload, "Src Radio");
-            extract_addrs3(payload, "Dest Mac");
-            extract_addrs4(payload, "Src Mac");
-            return fill_mac(identifiedNetwork, &payload[28]);
-
-            break;
-
+            return &payload[16];
+        case bridge:
+            return &payload[28];
         default:
-
-            printf("unknown address type");
-            break;
+            return &payload[10];
         
 
     }
 }
-
+/*
 void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, uint16_t payloadSize, identified_network *newNetwork)
 {
     
@@ -68,7 +32,7 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
     {  
         case managementFrame:
             //TODO - managementFrame
-            /*
+            
             Overall checklist of management Frame
             Identify beacons and search for Tag 48 looking for wpa2(secure) or
             uses obsolete prtocols
@@ -78,37 +42,37 @@ void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, ui
             Look For subtype 12(0x0C -> deauth atack)
 
             Look for phantoms (probe request) extracting SSID of mobiles that visit 
-            */
-           
+                       
            payload_data_walker(payload, payloadSize);
             break;
         case controlFrame:
             printf("control\n");
             //TODO - controlframe
-            /*
+            
             Density identifier -> A high count of Subtype 1 movement suggest high count
             of devices (human activity)
             
             Identify congestion of channel -> monitoring petitions to know how interfeered 
             will LoRa comms be
-            */
+            
             break;
         case dataFrame:
             //TODO - dataFrame
             printf("dataframe\n");
-            /*
+            
             Relations Map -> Analize MAC from origin and destiny to identify 
             what devices are connected to what routers
             
             IoT Heartbeats -> look for patrons of small but constant information 
             to identify cameras and sensors
             
-            */
+            
             break;
         default:
             printf("not valid data Type\n");
             break;
         
     }
-}
-
+} 
+I think im not gonna use this at all
+*/

@@ -6,7 +6,7 @@
 #define beacon                   8
 #define payloadHeaderSize        24
 
-bool validate_network(unsigned char *subtype);
+bool validate_network(int subtype);
 bool is_valid_payload(int size);
 
 

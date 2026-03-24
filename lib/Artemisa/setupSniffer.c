@@ -5,6 +5,7 @@
 #include "extract.h"
 #include "esp_netif.h"
 #include "esp_event.h"
+#include "extract.h"
 
 void wifi_stack_init()
 {
@@ -91,19 +92,48 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
 
     unsigned char *payload = (unsigned char *)packet->payload;
     uint16_t payloadSize = packet->rx_ctrl.sig_len;
+    uint8_t rssi = packet->rx_ctrl.rssi;
+    //TODO debug
+    if (validate_network(extract_subtype(payload)))
+    { 
+        uint_least8_t flagsBoolean = 0x00 ;  
+    
+        extract_toDs(payload, &flagsBoolean);
+        extract_fromDs(payload, &flagsBoolean);
+    
+    //TODO following this comment youll find the LAMEST patch ever created
+    //im way too tired for this shit
+    //instead of reusing the functions I already worked my ass off ill just re do it here cuz otherwise wont work
+    //ill check that later
+    
+    
+        unsigned char *srcMac = extract_mac_addres(payload, &flagsBoolean);
 
-    if(is_valid_payload(payloadSize))
-    {          
-        payload_header_extractor(payload,payloadSize);
+        identified_network *network = find_network(srcMac);
+
+
+
+        if(network != NULL)
+        {
+            update_network(network, rssi, get_time_ms());
+        }
+        else
+        {
+            create_new_network(srcMac, rssi, (unsigned char*)"PlaceHolder name..", 0 , 11);
+            network = head; 
+        }
+        //TODO still a lot of stuff to correct
+        payload_data_walker(payload, payloadSize,network);
     }
+    
 }
 
-void payload_interpreter(unsigned char *payload, uint16_t payloadSize){
+/*void payload_interpreter(unsigned char *payload, uint16_t payloadSize){
 
     payload_header_extractor(payload , payloadSize);
     payload_data_walker(payload , payloadSize);
 
-}
+}*/
 
 void sniffer_init(){
 
