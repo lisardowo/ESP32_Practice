@@ -22,20 +22,12 @@ channel 14 is jst for japan. Change based in ur location but is not that nedeed,
 
 */
 
-typedef struct __attribute__((packed)) {
 
-    unsigned char version; //Protocol Version
-    unsigned char Type; //funion of frame (management control or data)
-    unsigned char Subtype; // indicates frame purpose (?) 0000 for association , 1000 for beacon
-    uint_least8_t flagsBoolean;
 
-}  frameControl;
-
-void payload_interpreter(unsigned char *payload, uint16_t payloadSize);
 void memory_initializer();
 void set_promiscuous();
-void channel_swapping();
-void sniffed_packets_handler();
+void channel_swapping(void *parametersTopass);
+void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type);
 void sniffer_init();
 
 #endif

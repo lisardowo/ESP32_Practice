@@ -52,9 +52,6 @@ void fill_packetCount(identified_network *identified_network, uint16_t *packetCo
 void fill_wpsActive(identified_network *identified_network, unsigned char *wpsActive);
 void fill_authMode(identified_network *identified_network, unsigned char *authMode);
 void fill_pmfRequired(identified_network *identified_network, unsigned char *pmfRequired);
-void fill_isRogue(identified_network *identified_network, unsigned char *isRogue);
-void fill_reserved(identified_network *identified_network, unsigned char *reserved);
-void DEBUGSHOWSTRUCT(identified_network *identified_network);
 void display_networks();
 
 void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength);

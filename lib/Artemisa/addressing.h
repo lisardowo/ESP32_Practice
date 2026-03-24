@@ -17,8 +17,6 @@
 #define controlFrame            1
 #define dataFrame               2
 
-
-// I think im not gonna use this anymore void frame_type_interpreter(uint_least8_t *frameType, unsigned char *payload, uint16_t payloadSize, identified_network *netNetwork); //TODO identified network do not belong here
 unsigned char* type_of_addressing(uint_least8_t direction, unsigned char *payload);
 
 

@@ -20,38 +20,14 @@
 //TODO refactorize 2 header files, properly allocate code based in what it does
 
 
-
-void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-
-
-    unsigned char frameControl = payload[0]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x03; 
-
-    unsigned char protocol = frameControl & mask;
-
-    printf("Protocol : %X\n", protocol);
-
-    //TODO -> DEBUG print, delete 4 production
-
-}
-
 int extract_type(unsigned char *payload)
 {
-
     
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
     unsigned char typeMask = 0x0C; 
 
     return((frameControlFragment & typeMask) >> 2);
-
-
     
-    //frame_type_interpreter(&frameType, payload, payloadSize);
-   //TODO debugg
-   //TODO if possible id like to use the interpreter OUTSIDE this function
-                                                             // , but also wanna avoid returns an stuff due to memory reasons
-  
 }
 
 int extract_subtype(unsigned char *payload)
@@ -61,10 +37,7 @@ int extract_subtype(unsigned char *payload)
     unsigned char typeMask = 0xF0; 
 
     return( (frameControlFragment & typeMask) >> 4);
-
-
     
-
 }
 
 void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean)
@@ -77,9 +50,6 @@ void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean)
     if(toDs){
         *flagsBoolean |= flagToDs;
     }
-
-    //printf("toDs : %X\n", toDs);
-
     
 }
 void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean)
@@ -94,106 +64,7 @@ void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean)
     {
         *flagsBoolean |= flagFromDs;
     }
-    //printf("fromDs : %X\n", fromDs);
 
-}
-
-void extract_retry(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x08; 
-
-    unsigned char retry = (frameControlFragment & mask) >> normalizeFlagRetry;
-    
-    if (retry)
-    {
-        *flagsBoolean |= flagRetry;
-    }
-
-    printf("extract_retry : %X\n", retry);
-    
-}
-
-void extract_powerManagement(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x10; 
-
-    unsigned char powerManagement = (frameControlFragment & mask) >> normalizeFlagPowerMgmt;
-
-    if (powerManagement)
-    {
-        *flagsBoolean |= flagPowerManagement;
-    }
-    printf("power Management : %X\n", powerManagement);
-
-}
-
-void extract_wep(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x40; 
-
-    unsigned char wep = (frameControlFragment & mask) >> normalizeFlagWep;
-    if(wep)
-    {
-        *flagsBoolean |= flagWep;
-    }
-    
-    
-    printf("WEP : %X\n", wep);    
-    
-}
-
-void extract_order(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-    
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x80; 
-
-    unsigned char order = (frameControlFragment & mask) >> normalizeFlagOrder;
-    if(order)
-    {
-        *flagsBoolean |= flagOrder;
-    }
-    printf("Order : %X\n", order);
-    
-}
-
-
-void extract_more_frag(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x04; 
-
-    unsigned char moreFrag = (frameControlFragment & mask) >> normalizeFlagMoreFrag;
-
-    if(moreFrag)
-    {
-        *flagsBoolean |= flagMoreFrag;
-    }
-
-    printf("moreFrag : %X\n", moreFrag);
-    
-}
-
-void extract_more_data(unsigned char *payload, uint_least8_t *flagsBoolean)
-{
-    
-    unsigned char frameControlFragment = payload[1]; //Frame control is from two BYTES (so two fragments)
-    unsigned char mask = 0x20; 
-
-    unsigned char moreData = (frameControlFragment & mask) >> normalizeFlagMoreData;
-
-    if(moreData)
-    {
-        *flagsBoolean |= flagMoreData;
-    }
-    printf("moreData : %X\n", moreData);
-    
 }
 
 unsigned char* extract_mac_addres(unsigned char *payload, uint_least8_t *flagsBoolean)
@@ -228,8 +99,6 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identifie
             {
                     
                     fill_ssid(network , &payload[position + 2], tagLenght);
-                    
-                    printf("\n");
                     break;
             }
 
@@ -237,18 +106,10 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identifie
                 {
                     uint8_t channel = payload[position + 2];
                     fill_channel(network, &channel);
-                    //printf("DS param : ");
+                   
                     break;
                 }
-          /* TODO is case tim really needed? 
-          case TIM:
-               { 
-                    unsigned char tim[tag_lenght] ;
-                    memcpy(tim, &payload[position + 2], tag_lenght);
-    
-                    printf("\n");
-                    break;
-                }*/
+
 
             case BSSLOAD:
                 {
@@ -282,20 +143,6 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identifie
                         break;
                 }
 
-            /*TODO i think that mobility is also not neccesary
-            case mobility:
-                {   
-                    unsigned char mob[tagLenght];
-                    memcpy(mob, &payload[position + 2], tagLenght);
-                    printf("Mobility : ");
-                    for(int i = 0 ; i < tagLenght ; i++)
-                    {
-                        printf("%04X ", mob[i]);
-                    }
-                   printf("\n");
-                    break;
-                }*/
-
             case WPALEGACY:
                 {
                     uint8_t *vendor = &payload[position + contentTag];
@@ -310,5 +157,5 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identifie
         
         position += 2 + tagLenght;
     }
-    //DEBUGSHOWSTRUCT(network);
+
 }

@@ -12,7 +12,6 @@
 #define normalizeSplitTag        8
 #define defaultWpaMode           2
 #define normalizePmf             0x0080
-//TODO i have to move tis
 
 #define vendorTagPosition1  0x00
 #define vendorTagPosition2  0x50
@@ -47,21 +46,10 @@
 #define networkNameMaxLenght     33 // 32char + null terminator
 
 unsigned char* extract_mac_addres(unsigned char *payload, uint_least8_t *flagsBoolean);
-void payload_header_extractor(unsigned char *payload, uint16_t payloadSize);
-void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean);
 int extract_type(unsigned char *payload);
 int extract_subtype(unsigned char *payload);
 void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean);
-void extract_retry(unsigned char *payload, uint_least8_t *flagsBoolean);
-void extract_powerManagement(unsigned char *payload, uint_least8_t *flagsBoolean);
-void extract_wep(unsigned char *payload, uint_least8_t *flagsBoolean);
-void extract_order(unsigned char *payload, uint_least8_t *flagsBoolean);
 void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean);
-
-/*void extract_addrs1(unsigned char *payload, const char *type);
-void extract_addrs2(unsigned char *payload, const char *type);
-void extract_addrs3(unsigned char *payload, const char *type);
-void extract_addrs4(unsigned char *payload, const char *type); */
 
 void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identified_network* network);
 

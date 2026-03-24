@@ -9,7 +9,6 @@
 
 bool validate_management_frame(int type);
 bool validate_beacon_subtype(int subtype);
-bool is_valid_payload(int size);
 
 
 #endif

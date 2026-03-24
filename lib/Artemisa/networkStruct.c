@@ -30,11 +30,12 @@ void fill_ssid(identified_network *identified_network, unsigned char *networkNam
     memcpy(identified_network->ssid, networkName ,copyString );//leaves one char for null terminator
     identified_network->ssid[ssidMaxSizeStruct-1] = 0; //fill last char with null terminator
 }
+
 void fill_rssi(identified_network *identified_network, int8_t *rssi)
 {
      identified_network->rssi = *rssi;
 }
-void fill_channel(identified_network *identified_network, unsigned char *channel)
+void fill_channel(identified_network *identified_network, uint8_t *channel)
 {
      identified_network->channel = *channel;
 }
@@ -58,32 +59,7 @@ void fill_pmfRequired(identified_network *identified_network, unsigned char *pmf
 {
     identified_network->securityFlags.pmfRequired = *pmfRequired;
 }
-void fill_isRogue(identified_network *identified_network, unsigned char *isRogue)
-{
-    identified_network->securityFlags.isRogue = *isRogue;
-}
-void fill_reserved(identified_network *identified_network, unsigned char *reserved)
-{
-    identified_network->securityFlags.reserved = *reserved;
-}
 
-void DEBUGSHOWSTRUCT(identified_network *identified_network)
-{//TODO eliminar -> debug function, delete
-    printf("filled MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-       identified_network->mac[0], identified_network->mac[1],
-       identified_network->mac[2], identified_network->mac[3],
-       identified_network->mac[4], identified_network->mac[5]);
-    printf("networkName : %s\n",identified_network->ssid);
-    printf("rssi : %"PRIu8 "\n", identified_network->rssi);
-    printf("Channel : %u", identified_network->channel);
-    printf("lastSeen : %"PRIu32 "\n", identified_network->lastSeen);
-    printf("packetCount : %"PRIu16 "\n", identified_network->packetCount);
-    printf("wpsActive : %u\n", identified_network->securityFlags.wpsActive);
-    printf("authMode : %u\n", identified_network->securityFlags.authMode);
-    printf("pmfRequired : %u\n", identified_network->securityFlags.pmfRequired);
-    printf("isRogue : %u\n", identified_network->securityFlags.isRogue); 
-    printf("reserved : %u\n", identified_network->securityFlags.reserved);
-}
 void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength)
 {
     identified_network *newNetwork = (identified_network*)malloc(sizeof(identified_network));
@@ -98,7 +74,6 @@ void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, u
 
     uint32_t now = get_time_ms();
     fill_lastSeen(newNetwork, &now);
-    //fill_packetCount(newNetwork, initialCount);
 
     uint8_t index = convert_to_hash(mac);
     newNetwork->hashNext = hashTable[index];
@@ -120,7 +95,7 @@ void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, u
 
 identified_network* find_network(unsigned char *mac)
 {
-    //TODO implement a hash table for quick search
+
     uint8_t index = convert_to_hash(mac);
     identified_network *currentNetwork = hashTable[index];
 
