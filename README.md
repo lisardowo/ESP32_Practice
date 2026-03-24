@@ -17,6 +17,9 @@ Hermes is designed as the first part in a several "doomsday - devices" project, 
 - Foccus in privacy and security
 - Central Part of a transversal "judgement day" inspired devices
 
+## Other modules :
+- [Artemisa][https://github.com/lisardowo/HERMES/blob/main/lib/Artemisa/README.md]
+
 ## Features
 
 - **Messaging off the grid**
