@@ -14,6 +14,8 @@ Artemisa is a Wi-Fi promiscuous sniffer and 802.11 frame parser intended for ESP
 8. Optimization -> FLAVORTOWN OPTIMIZATION QUEST :3
 9. Current Known Gaps for API Consumers
 10. Minimal Example
+11. Installation and Quick Test (ESP32 + PlatformIO)
+12. Releases and Downloadable Artifacts
 
 ## Project Origin
 
@@ -325,3 +327,73 @@ void app_main(void)
 ```
 
 This starts promiscuous sniffing and parsing with current defaults.
+
+## 11. Installation and Quick Test (ESP32 + PlatformIO)
+
+### Requirements
+
+1. ESP32 board compatible with ESP-IDF.
+2. VS Code with PlatformIO extension.
+3. USB cable and serial permissions.
+4. Git installed.
+
+### Clone and open
+
+1. Clone this repository.
+2. Open the project folder in VS Code.
+3. Verify the board environment in `platformio.ini` (example: `esp32doit-devkit-v1`).
+
+### Build
+
+```bash
+pio run
+```
+
+### Upload
+
+```bash
+pio run -t upload
+```
+
+### Monitor
+
+```bash
+pio device monitor
+```
+
+### Expected output
+
+1. Startup messages for promiscuous setup.
+2. Periodic network table with columns:
+  - BSSID
+  - SSID
+  - CH
+  - RSSI
+  - AUTH
+  - WPS
+3. Networks sorted by RSSI.
+
+### Troubleshooting
+
+1. No networks detected:
+  - Check antenna/power and ensure Wi-Fi traffic exists nearby.
+2. Hotspot not visible:
+  - Force hotspot to 2.4 GHz and fixed channel if possible.
+3. Build errors:
+  - Run a clean build.
+
+```bash
+pio run -t clean
+pio run
+```
+
+4. Serial port busy:
+  - Check port with `pio device list` and close other serial tools.
+
+## 12. Releases and Downloadable Artifacts
+
+### Using GitHub Releases
+
+1. Download `Artemisa-vX.Y.Z.zip` or `Artemisa-vX.Y.Z.tar.gz` from Release assets.
+2. Extract and copy `Artemisa` into your project's `lib` directory.
+3. Build and upload normally with PlatformIO.
