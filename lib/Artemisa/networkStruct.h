@@ -45,7 +45,7 @@ typedef struct identified_network {
 
 unsigned char* fill_mac(identified_network *identified_network, unsigned char *mac);
 void fill_ssid(identified_network *identified_network, unsigned char *networkName,uint8_t tagLength);
-void fill_rssi(identified_network *identified_network, uint8_t *rssi);
+void fill_rssi(identified_network *identified_network, int8_t *rssi);
 void fill_channel(identified_network *identified_network, uint8_t *channel);
 void fill_lastSeen(identified_network *identified_network, uint32_t *lastSeen);
 void fill_packetCount(identified_network *identified_network, uint16_t *packetCount);
@@ -55,11 +55,12 @@ void fill_pmfRequired(identified_network *identified_network, unsigned char *pmf
 void fill_isRogue(identified_network *identified_network, unsigned char *isRogue);
 void fill_reserved(identified_network *identified_network, unsigned char *reserved);
 void DEBUGSHOWSTRUCT(identified_network *identified_network);
+void display_networks();
 
-void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength);
+void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength);
 identified_network* find_network(unsigned char *mac);
 void delete_old_networks();
-void update_network(identified_network *network, uint8_t rssi, uint32_t timestamp);
+void update_network(identified_network *network, int8_t rssi, uint32_t timestamp);
 void delete_network(identified_network *network);
 
 uint32_t get_time_ms(); //TODO not sure if this belongs here, i may move it

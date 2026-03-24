@@ -33,9 +33,13 @@ void channel_swapping(void *parametersTopass)
     while(1){
     for(uint_least8_t i = 1; i <= maxChannels; i++) 
     {
-        printf("The value is %" PRIu8 "\n", i);
+       
         ESP_ERROR_CHECK(esp_wifi_set_channel(i, WIFI_SECOND_CHAN_NONE));
+        delete_old_networks();
+        display_networks();
+
         vTaskDelay(pdMS_TO_TICKS(3000));
+
     }
     }
 }
@@ -92,9 +96,9 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
 
     unsigned char *payload = (unsigned char *)packet->payload;
     uint16_t payloadSize = packet->rx_ctrl.sig_len;
-    uint8_t rssi = packet->rx_ctrl.rssi;
+    int8_t rssi = packet->rx_ctrl.rssi;
     //TODO debug
-    if (validate_network(extract_subtype(payload)))
+    if (validate_beacon_subtype(extract_subtype(payload)) && validate_management_frame(extract_type(payload)))
     { 
         uint_least8_t flagsBoolean = 0x00 ;  
     
@@ -121,9 +125,10 @@ void sniffed_packets_handler(void* buf, wifi_promiscuous_pkt_type_t type){
         {
             create_new_network(srcMac, rssi, (unsigned char*)"PlaceHolder name..", 0 , 11);
             network = head; 
+            payload_data_walker(payload, payloadSize,network);
         }
         //TODO still a lot of stuff to correct
-        payload_data_walker(payload, payloadSize,network);
+        
     }
     
 }

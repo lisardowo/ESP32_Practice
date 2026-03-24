@@ -5,29 +5,13 @@
 #include "networkStruct.h"
 #include <inttypes.h>
 #include "hashing.h"
+int compare_network_rssi(const void *a, const void *b);
 
 identified_network* hashTable[hashSize] = {NULL};
 identified_network* head = NULL; 
 identified_network* tail = NULL;
 
-/* void fill_struct(identified_network *identifiedNetwork, unsigned char *pmfRequired, uint32_t *lastSeen ,unsigned char *mac,unsigned char *networkName, unsigned char *channel  , uint8_t *rssi , unsigned char *authMode, unsigned char *reserved, uint16_t *packetCount, unsigned char *isRogue, unsigned char *wpsActive)
-{
-    
-    identified_network debugStruct2;//TODO debug struct
 
-    fill_authMode(&debugStruct2, authMode);
-    fill_channel(&debugStruct2, channel);
-    fill_isRogue(&debugStruct2,isRogue);
-    fill_lastSeen(&debugStruct2,lastSeen);
-    fill_mac(&debugStruct2, mac);
-    fill_packetCount(&debugStruct2,packetCount);
-    fill_pmfRequired(&debugStruct2,pmfRequired);
-    fill_reserved(&debugStruct2,reserved); //TODO addres of operation is for debug (since the nerwokr is created in scope) so it shall be eliminated for prod 
-    fill_rssi(&debugStruct2,rssi);
-    fill_ssid(&debugStruct2,networkName);
-    fill_wpsActive(&debugStruct2,wpsActive);
-    DEBUGSHOWSTRUCT(&debugStruct2);//TODO -> DEBUG show filled debug struct
-} */
 
 unsigned char* fill_mac(identified_network *identified_network, unsigned char *mac)
 {
@@ -36,15 +20,17 @@ unsigned char* fill_mac(identified_network *identified_network, unsigned char *m
 }
 void fill_ssid(identified_network *identified_network, unsigned char *networkName, uint8_t tagLength)
 {   
+    memset(identified_network->ssid, 0 , ssidMaxSizeStruct);
     if (tagLength == 0)
     {
         strcpy(identified_network->ssid, "Hiden network");
         return;
     }
-    memcpy(identified_network->ssid, networkName ,ssidMaxSizeStruct-2 );//leaves one char for null terminator
+    uint8_t copyString = (tagLength < ssidMaxSizeStruct -1) ? tagLength : ssidMaxSizeStruct -1;
+    memcpy(identified_network->ssid, networkName ,copyString );//leaves one char for null terminator
     identified_network->ssid[ssidMaxSizeStruct-1] = 0; //fill last char with null terminator
 }
-void fill_rssi(identified_network *identified_network, uint8_t *rssi)
+void fill_rssi(identified_network *identified_network, int8_t *rssi)
 {
      identified_network->rssi = *rssi;
 }
@@ -87,7 +73,7 @@ void DEBUGSHOWSTRUCT(identified_network *identified_network)
        identified_network->mac[0], identified_network->mac[1],
        identified_network->mac[2], identified_network->mac[3],
        identified_network->mac[4], identified_network->mac[5]);
-    printf("networkName : %sc",identified_network->ssid);
+    printf("networkName : %s\n",identified_network->ssid);
     printf("rssi : %"PRIu8 "\n", identified_network->rssi);
     printf("Channel : %u", identified_network->channel);
     printf("lastSeen : %"PRIu32 "\n", identified_network->lastSeen);
@@ -98,7 +84,7 @@ void DEBUGSHOWSTRUCT(identified_network *identified_network)
     printf("isRogue : %u\n", identified_network->securityFlags.isRogue); 
     printf("reserved : %u\n", identified_network->securityFlags.reserved);
 }
-void create_new_network(unsigned char *mac , uint8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength)
+void create_new_network(unsigned char *mac , int8_t rssi, unsigned char *ssid, unsigned char channel, uint8_t tagLength)
 {
     identified_network *newNetwork = (identified_network*)malloc(sizeof(identified_network));
     if(!newNetwork)
@@ -203,7 +189,7 @@ void delete_network(identified_network *network)
 
 
 }
-void update_network(identified_network *network, uint8_t rssi, uint32_t timestamp)
+void update_network(identified_network *network, int8_t rssi, uint32_t timestamp)
 {
     fill_rssi(network, &rssi);
     fill_lastSeen(network, &timestamp);
@@ -234,6 +220,76 @@ void update_network(identified_network *network, uint8_t rssi, uint32_t timestam
     head = network;
 
 
+}
+void display_networks()
+{
+    uint16_t networkCount = 0;
+    identified_network *currentNetwork = head;
+    while(currentNetwork)
+    {
+        networkCount ++;
+        currentNetwork = currentNetwork->next;
+    }
+
+    if (networkCount == 0)
+    {
+        printf("no devices detected");
+        return;
+    }
+
+    identified_network **sortedNetworks = malloc(sizeof(identified_network*) * networkCount);
+    if (!sortedNetworks) 
+    {
+        return;
+    }
+
+    currentNetwork = head;
+    for (int i = 0 ; i < networkCount ; i++)
+    {
+        sortedNetworks[i] = currentNetwork;
+        currentNetwork = currentNetwork->next;
+    }
+
+    qsort(sortedNetworks, networkCount , sizeof(identified_network*), compare_network_rssi);
+
+    printf(" === Founded Networks === \n");
+
+    printf("%-18s | %-15s | %-4s | %-5s | %-6s | %-4s |\n ", "BSSID", "SSID", "CH", "RSSI", "AUTH", "WPS");
+
+    printf(" ======================== \n");
+    
+    for (int i = 0 ; i < networkCount ; i++)
+    {
+        identified_network *displayNetwork = sortedNetworks[i];
+
+        const char* wpaVersionString = (displayNetwork->securityFlags.authMode == 3) ? "WPA3" : (displayNetwork->securityFlags.authMode == 2) ? "WPA2" : "NO WPA";  
+
+        printf(" %02x:%02x:%02x:%02x:%02x:%02x | %-15s | %-4u | %-5d | %-6s | %-4s\n", displayNetwork->mac[0] , displayNetwork->mac[1] ,
+                                                                                       displayNetwork->mac[2] , displayNetwork->mac[3] , displayNetwork->mac[4] , displayNetwork->mac[5] ,
+                                                                                       displayNetwork->ssid,displayNetwork->channel,displayNetwork->rssi, wpaVersionString, displayNetwork->securityFlags.wpsActive ? "WPS active" : "WPS not found"
+                                                                                    );
+        printf("total founded networks : %d", networkCount);
+
+    }
+    free(sortedNetworks);
+}
+
+int compare_network_rssi(const void *a, const void *b)
+{
+    identified_network *networkA = *(identified_network **)a;
+    identified_network *networkB = *(identified_network **)b;
+    if (networkA->rssi < networkB->rssi)
+    {
+        return 1;
+    } 
+    if (networkA->rssi > networkB->rssi)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 uint32_t get_time_ms()

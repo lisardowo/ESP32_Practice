@@ -3,10 +3,12 @@
 
 #include <stdbool.h>
 
+#define managementFrame          0
 #define beacon                   8
 #define payloadHeaderSize        24
 
-bool validate_network(int subtype);
+bool validate_management_frame(int type);
+bool validate_beacon_subtype(int subtype);
 bool is_valid_payload(int size);
 
 

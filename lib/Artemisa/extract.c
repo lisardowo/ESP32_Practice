@@ -36,16 +36,16 @@ void extract_protocol(unsigned char *payload, uint_least8_t *flagsBoolean)
 
 }
 
-void extract_type(unsigned char *payload, uint_least8_t *flagsBoolean, uint16_t payloadSize)
+int extract_type(unsigned char *payload)
 {
 
     
     unsigned char frameControlFragment = payload[0]; //Frame control is from two BYTES (so two fragments)
     unsigned char typeMask = 0x0C; 
 
-    unsigned char frameType = (frameControlFragment & typeMask) >> 2;
+    return((frameControlFragment & typeMask) >> 2);
 
-    printf("type : %X\n", frameType);
+
     
     //frame_type_interpreter(&frameType, payload, payloadSize);
    //TODO debugg
@@ -78,7 +78,7 @@ void extract_toDs(unsigned char *payload, uint_least8_t *flagsBoolean)
         *flagsBoolean |= flagToDs;
     }
 
-    printf("toDs : %X\n", toDs);
+    //printf("toDs : %X\n", toDs);
 
     
 }
@@ -94,7 +94,7 @@ void extract_fromDs(unsigned char *payload, uint_least8_t *flagsBoolean)
     {
         *flagsBoolean |= flagFromDs;
     }
-    printf("fromDs : %X\n", fromDs);
+    //printf("fromDs : %X\n", fromDs);
 
 }
 
@@ -310,5 +310,5 @@ void payload_data_walker(unsigned char *payload, uint16_t totalLenght, identifie
         
         position += 2 + tagLenght;
     }
-    DEBUGSHOWSTRUCT(network);
+    //DEBUGSHOWSTRUCT(network);
 }
