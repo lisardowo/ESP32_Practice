@@ -1,0 +1,23 @@
+#ifndef ADDRESSING_H
+#define ADDRESSING_H
+
+#include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include "networkStruct.h"
+
+#define extractToAndFromMask     0x03
+
+#define dtlFrames               0x00
+#define dsToClient              0x01
+#define clientToDS              0x02
+#define bridge                  0x03
+
+#define managementFrame         0
+#define controlFrame            1
+#define dataFrame               2
+
+unsigned char* type_of_addressing(uint_least8_t direction, unsigned char *payload);
+
+
+#endif
