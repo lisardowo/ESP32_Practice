@@ -1,5 +1,11 @@
 # Artemisa Library/API Documentation
 
+---
+
+This device is intended solely for experimental purposes and is not meant for any illegal activities. We do not condone unlawful behavior and strongly encourage you to use it only within the bounds of the law.
+
+---
+
 Artemisa is a Wi-Fi promiscuous sniffer and 802.11 frame parser intended for ESP32 (ESP-IDF via PlatformIO). The final objective of the device is to scan and display relevant security information of nearby networks for auditing; paired with their big brother(Hermes-Module HUB(currently under development T.T)) the device can display a small map of the networks it scans and throw sum small, basic attacks to prove founded vulnerabilityes. It is organized as small C modules that can be reused as a library and extended by final users.
 
 ## Index
